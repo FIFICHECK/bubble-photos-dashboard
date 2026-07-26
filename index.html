@@ -10,88 +10,177 @@ html{color-scheme:dark}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;color:#e0e0e0;padding:20px}
 .container{max-width:1500px;margin:0 auto}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
-.header h1{font-size:1.5rem;color:#e94560}
-.header .sub{color:#888;font-size:0.85rem}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
-.card{background:#16213e;border:1px solid #0f3460;border-radius:8px;padding:15px;text-align:center}
-.card h3{font-size:0.75rem;color:#888;margin-bottom:5px;text-transform:uppercase}
-.card .v{font-size:2rem;font-weight:bold;color:#e94560}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-right{display:flex;align-items:center;gap:10px}
+.header h1{font-size:1.4rem;color:#e94560;white-space:nowrap}
+.header .sub{color:#888;font-size:0.8rem}
+.help-btn{width:32px;height:32px;border-radius:50%;background:#0f3460;border:1px solid #1a3a6a;color:#888;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.help-btn:hover{background:#e94560;color:#fff;border-color:#e94560}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #0f3460;border-radius:8px;padding:12px;text-align:center}
+.card h3{font-size:0.7rem;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
+.card .v{font-size:1.6rem;font-weight:bold;color:#e94560}
 .card .v.green{color:#2ecc71}
 .card .v.blue{color:#3498db}
 .card .v.yellow{color:#ffd700}
-.tcard .v{font-size:1.8rem;font-family:monospace}
-.section{background:#16213e;border:1px solid #0f3460;border-radius:8px;margin-bottom:20px;overflow:hidden}
-.tabs{display:flex;border-bottom:1px solid #0f3460}
-.tab{padding:10px 20px;cursor:pointer;color:#888;border-bottom:2px solid transparent;font-size:0.85rem}
+.section{background:#16213e;border:1px solid #0f3460;border-radius:10px;margin-bottom:20px;overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid #0f3460;background:#1a1a2e}
+.tab{padding:10px 20px;cursor:pointer;color:#666;border-bottom:2px solid transparent;font-size:0.85rem;font-weight:600;transition:all .2s}
+.tab:hover{color:#e0e0e0}
 .tab.active{color:#e94560;border-bottom-color:#e94560}
 .tc{display:none;padding:15px}
 .tc.active{display:block}
-.scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{width:100%;border-collapse:collapse;table-layout:fixed}
-th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #0f3460;font-size:0.8rem}
-th{background:#1a1a2e;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.3px}
-tr:hover{background:rgba(233,69,96,0.05)}
-.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:0.7rem;font-weight:bold}
-.badge.active{background:rgba(46,204,113,0.2);color:#2ecc71;border:1px solid #2ecc71}
-.badge.completed{background:rgba(52,152,219,0.2);color:#3498db;border:1px solid #3498db}
-.badge.pending{background:rgba(255,215,0,0.2);color:#ffd700;border:1px solid #ffd700}
-.badge.failed{background:rgba(233,69,96,0.2);color:#e94560;border:1px solid #e94560}
-.preview{width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid #0f3460;cursor:pointer;transition:transform .2s}
-.preview:hover{transform:scale(1.1)}
-.preview.na{display:flex;align-items:center;justify-content:center;background:#1a1a2e;color:#555;font-size:0.6rem;cursor:default}
-.photo-strip{display:flex;gap:4px;align-items:center}
-.photo-strip .arrow{color:#555;font-size:0.7rem}
-input,select,textarea{background:#0f3460;border:1px solid #1a3a6a;color:#e0e0e0;padding:8px 10px;border-radius:4px;width:100%;font-size:0.8rem;margin-bottom:8px}
-input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560}
-.btn{padding:8px 16px;border:none;border-radius:4px;cursor:pointer;font-weight:bold;font-size:0.8rem;transition:opacity .2s;margin:2px}
-.btn:hover{opacity:.85}
+.scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:6px}
+table{width:100%;border-collapse:separate;border-spacing:0;min-width:900px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #0f3460;font-size:0.8rem;vertical-align:middle}
+th{background:#1a1a2e;color:#aaa;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;font-size:0.7rem;position:sticky;top:0;z-index:1}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(233,69,96,0.04)}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:700;letter-spacing:0.3px}
+.badge.active{background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.3)}
+.badge.completed{background:rgba(52,152,219,0.15);color:#3498db;border:1px solid rgba(52,152,219,0.3)}
+.badge.pending{background:rgba(255,215,0,0.15);color:#ffd700;border:1px solid rgba(255,215,0,0.3)}
+.badge.failed{background:rgba(233,69,96,0.15);color:#e94560;border:1px solid rgba(233,69,96,0.3)}
+.preview{width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #0f3460;cursor:pointer;transition:all .2s;display:block}
+.preview:hover{transform:scale(1.15);border-color:#e94560;box-shadow:0 0 12px rgba(233,69,96,0.3)}
+.preview.na{display:flex;align-items:center;justify-content:center;width:48px;height:48px;background:#1a1a2e;color:#444;font-size:0.6rem;border-radius:6px;border:1px dashed #0f3460;cursor:default}
+input,select,textarea{background:#0f3460;border:1px solid #1a3a6a;color:#e0e0e0;padding:8px 12px;border-radius:6px;width:100%;font-size:0.8rem;margin-bottom:8px;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560;box-shadow:0 0 0 2px rgba(233,69,96,0.15)}
+.btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:0.8rem;transition:all .2s;margin:2px}
+.btn:hover{opacity:.9;transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
 .btn-pink{background:#e94560;color:#fff}
-.btn-green{background:#2ecc71;color:#fff}
+.btn-green{background:#2ecc71;color:#fff;box-shadow:0 2px 8px rgba(46,204,113,0.2)}
+.btn-green:hover{box-shadow:0 4px 12px rgba(46,204,113,0.3)}
 .btn-blue{background:#3498db;color:#fff}
-.btn-sm{padding:4px 10px;font-size:0.7rem}
+.btn-sm{padding:5px 10px;font-size:0.7rem;border-radius:4px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-.msg{padding:10px 15px;border-radius:6px;margin-bottom:10px;font-size:0.8rem;display:none}
-.msg.ok{display:block;background:rgba(46,204,113,0.15);border:1px solid #2ecc71;color:#2ecc71}
-.msg.err{display:block;background:rgba(233,69,96,0.15);border:1px solid #e94560;color:#e94560}
-.empty{text-align:center;padding:40px;color:#555;font-size:0.9rem}
-.footer{text-align:center;padding:20px;margin-top:20px;border-top:1px solid #0f3460;font-size:0.75rem;color:#555}
-.phase-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;padding:8px;background:#1a1a2e;border-radius:6px;margin-bottom:6px}
-.phase-row label{display:block;font-size:0.7rem;color:#888;margin-bottom:2px}
+.msg{padding:10px 15px;border-radius:8px;margin-bottom:10px;font-size:0.8rem;display:none;font-weight:600}
+.msg.ok{display:block;background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.3);color:#2ecc71}
+.msg.err{display:block;background:rgba(233,69,96,0.12);border:1px solid rgba(233,69,96,0.3);color:#e94560}
+.empty{text-align:center;padding:40px;color:#444;font-size:0.9rem}
+.footer{text-align:center;padding:16px;margin-top:20px;border-top:1px solid #0f3460;font-size:0.7rem;color:#555}
+.phase-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:center;padding:10px;background:#1a1a2e;border-radius:8px;margin-bottom:8px;border:1px solid #0f3460}
+.phase-row label{display:block;font-size:0.7rem;color:#888;margin-bottom:3px;font-weight:600}
 /* Image viewer modal */
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:9999;cursor:zoom-out;justify-content:center;align-items:center}
-.modal.active{display:flex}
-.modal img{max-width:90vw;max-height:90vh;border-radius:8px;border:2px solid #0f3460;box-shadow:0 0 40px rgba(0,0,0,.5)}
-.modal .close{position:fixed;top:20px;right:30px;font-size:2rem;color:#e94560;cursor:pointer;z-index:10000;background:rgba(0,0,0,.5);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold}
-.modal .close:hover{background:#e94560;color:#fff}
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:9999;cursor:zoom-out;justify-content:center;align-items:center}
+.modal-overlay.active{display:flex}
+.modal-overlay img{max-width:90vw;max-height:90vh;border-radius:10px;border:2px solid #1a3a6a;box-shadow:0 0 50px rgba(0,0,0,.6)}
+.modal-overlay .close-btn{position:fixed;top:20px;right:30px;font-size:1.5rem;color:#e94560;cursor:pointer;z-index:10000;background:rgba(0,0,0,.6);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;border:1px solid rgba(233,69,96,0.3);transition:all .2s}
+.modal-overlay .close-btn:hover{background:#e94560;color:#fff}
+/* Help modal */
+.help-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:9998;justify-content:center;align-items:center}
+.help-overlay.active{display:flex}
+.help-box{background:#16213e;border:1px solid #0f3460;border-radius:12px;padding:30px;max-width:560px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 0 40px rgba(0,0,0,.4);position:relative}
+.help-box h2{color:#e94560;font-size:1.1rem;margin-bottom:15px}
+.help-box h3{color:#ffd700;font-size:0.9rem;margin:15px 0 8px}
+.help-box p,.help-box li{font-size:0.8rem;color:#ccc;line-height:1.7}
+.help-box ul{padding-left:20px}
+.help-box li{margin-bottom:4px}
+.help-box .close-btn{position:absolute;top:15px;right:18px;font-size:1.2rem;color:#888;cursor:pointer;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.help-box .close-btn:hover{color:#e94560;background:rgba(233,69,96,0.1)}
+.help-box .section{border:none;margin-bottom:0}
 /* SKU link */
-.sku-link{color:#3498db;text-decoration:none}
+.sku-link{color:#3498db;text-decoration:none;font-weight:500}
 .sku-link:hover{text-decoration:underline;color:#e94560}
-@media(max-width:768px){.g2{grid-template-columns:1fr}}
+/* Stats row improvements */
+.toolbar-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.toolbar-row .search-wrap{flex:1;min-width:200px;position:relative}
+.toolbar-row .search-wrap input{padding-left:30px;margin:0}
+.toolbar-row .search-wrap .search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#555;font-size:0.8rem}
+@media(max-width:768px){.g2{grid-template-columns:1fr}.header h1{font-size:1.1rem}.stats{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
 <div class="container">
+
+<!-- HEADER -->
 <div class="header">
-  <div><h1>🖼️ Bubble Photos Dashboard</h1><div class="sub">Per-SKU scheduled photo swaps</div></div>
-  <div id="hdr" style="color:#ffd700;font-size:0.8rem">⏱️ --</div>
+  <div class="header-left">
+    <h1>🖼️ Bubble Photos Dashboard</h1>
+    <span class="sub">Per-SKU scheduled photo swaps</span>
+  </div>
+  <div class="header-right">
+    <span id="hdr" style="color:#ffd700;font-size:0.8rem">⏱️ --</span>
+    <button class="help-btn" onclick="toggleHelp()" title="Help & Instructions">❓</button>
+  </div>
 </div>
+
+<!-- STATS -->
 <div class="stats" id="sts">
-  <div class="card"><h3>📦 Total</h3><div class="v blue" id="sTotal">0</div></div>
+  <div class="card"><h3>📦 Total SKUs</h3><div class="v blue" id="sTotal">0</div></div>
   <div class="card"><h3>🟢 Active</h3><div class="v green" id="sActive">0</div></div>
-  <div class="card"><h3>🔵 Done</h3><div class="v blue" id="sDone">0</div></div>
+  <div class="card"><h3>🔵 Completed</h3><div class="v blue" id="sDone">0</div></div>
   <div class="card"><h3>⏳ Pending</h3><div class="v yellow" id="sPending">0</div></div>
-  <div class="card tcard"><h3>🔄 Check</h3><div class="v" id="sTimer" style="font-size:1.8rem;color:#3498db;font-family:monospace">--</div></div>
-  <div class="card tcard"><h3>🔄 Refresh</h3><div class="v" id="sRefresh" style="font-size:1.8rem;color:#2ecc71;font-family:monospace">30s</div></div>
+  <div class="card"><h3>🔄 Next Check</h3><div class="v" id="sTimer" style="font-size:1.4rem;color:#3498db;font-family:monospace">--</div></div>
+  <div class="card"><h3>🔄 Auto Refresh</h3><div class="v" id="sRefresh" style="font-size:1.4rem;color:#2ecc71;font-family:monospace">30s</div></div>
 </div>
+
+<!-- MESSAGE -->
 <div id="msg" class="msg"></div>
 
-<!-- Image viewer modal -->
-<div id="imgModal" class="modal" onclick="closeImgViewer()">
-  <span class="close" onclick="closeImgViewer()">✕</span>
+<!-- IMAGE VIEWER MODAL -->
+<div id="imgModal" class="modal-overlay" onclick="closeImgViewer()">
+  <span class="close-btn" onclick="closeImgViewer()">✕</span>
   <img id="imgModalContent" src="" alt="Preview">
 </div>
 
+<!-- HELP MODAL -->
+<div id="helpModal" class="help-overlay" onclick="if(event.target===this)closeHelp()">
+  <div class="help-box">
+    <span class="close-btn" onclick="closeHelp()">✕</span>
+    <h2>📖 使用教學 & 注意事項</h2>
+
+    <h3>📌 基本流程</h3>
+    <ul>
+      <li>每個 SKU 可以設定多個 <b>Phases</b>（階段），每個 Phase 有時間 + 相片 URL</li>
+      <li>時間到就會自動經 MMS 換相</li>
+      <li>Cron 每 <b>5 分鐘</b> check 一次</li>
+    </ul>
+
+    <h3>➕ 新增 SKU</h3>
+    <ul>
+      <li>入 SKU ID（e.g. <code>B0961005_S_4891609702053</code>）</li>
+      <li>撳 <b>🔍 Fetch Name</b> 自動拎 product name（optional）</li>
+      <li>每個 Phase 入：Label / Photo URL / Time</li>
+      <li>撳 <b>💾 Save SKU</b> 儲存 → 自動跳去 SKUs 列表</li>
+    </ul>
+
+    <h3>🖼️ 相片 URL</h3>
+    <ul>
+      <li>要用 <b>直接圖片連結</b>（.jpg / .png / Google Drive CDN）</li>
+      <li>Google Drive: <code>https://lh3.googleusercontent.com/d/{FILE_ID}</code></li>
+      <li>❌ 唔好用 <code>drive.google.com/file/d/...</code>（HTML 頁面）</li>
+    </ul>
+
+    <h3>🗑️ 刪除</h3>
+    <ul>
+      <li><b>單個刪除</b>：撳 row 最右嘅 ✕ 掣</li>
+      <li><b>批量刪除</b>：Tick 左邊 checkbox → 撳頂部「🗑️ Delete Selected」</li>
+      <li>📝 Log 頁面同樣支援單個/批量刪除</li>
+    </ul>
+
+    <h3>⚠️ 注意事項</h3>
+    <ul>
+      <li>MMS session 大約 <b>2-3 分鐘</b> 過期，script 會自動 relogin</li>
+      <li>相片 click 可以 <b>放大預覽</b>，再 click 關閉</li>
+      <li>SKU ID 係 clickable link → 直接去 HKTVmall product page</li>
+      <li>如果 save 時出 SHA error 會 auto retry 5 次</li>
+      <li>Dashboard 每 <b>30 秒</b> auto refresh</li>
+    </ul>
+
+    <h3>📊 Status 狀態</h3>
+    <ul>
+      <li><span class="badge pending" style="font-size:0.7rem">⏳ Pending</span> = 未開始</li>
+      <li><span class="badge active" style="font-size:0.7rem">🟢 Active</span> = 進行中</li>
+      <li><span class="badge completed" style="font-size:0.7rem">🔵 Done</span> = 全部 phases 完成</li>
+      <li><span class="badge failed" style="font-size:0.7rem">❌ Fail</span> = Upload 失敗</li>
+    </ul>
+  </div>
+</div>
+
+<!-- MAIN SECTION -->
 <div class="section">
 <div class="tabs">
   <div class="tab active" onclick="sw('list')">📋 SKUs</div>
@@ -99,49 +188,83 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560}
   <div class="tab" onclick="sw('log')">📝 Log</div>
 </div>
 
-<!-- LIST -->
+<!-- LIST TAB -->
 <div id="tList" class="tc active">
-<div class="row" style="padding:0 0 10px 0">
-  <input type="text" id="search" placeholder="🔍 Search..." onkeyup="render()" style="flex:1;margin:0">
-  <button class="btn btn-blue btn-sm" onclick="fetchD()">🔄</button>
-  <button class="btn btn-sm" style="background:#e94560;color:#fff" onclick="batchDeleteSkus()" id="batchDelBtn">🗑️ Delete Selected</button>
+<div class="toolbar-row">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search" placeholder="Search SKU or product name..." onkeyup="render()">
+  </div>
+  <button class="btn btn-blue btn-sm" onclick="fetchD()">🔄 Refresh</button>
+  <button class="btn btn-sm" style="background:#e94560;color:#fff" onclick="batchDeleteSkus()">🗑️ Delete Selected</button>
 </div>
 <div class="scroll">
 <table>
-<thead><tr><th style="width:3%"><input type="checkbox" id="selectAll" onchange="toggleAll()"></th><th style="width:15%">SKU / Link</th><th style="width:14%">Product</th><th style="width:6%">Phase</th><th style="width:9%">Current 🖼️</th><th style="width:9%">Next 🖼️</th><th style="width:9%">Next Time</th><th style="width:8%">Status</th><th style="width:6%"></th></tr></thead>
+<thead><tr>
+  <th style="width:32px;text-align:center"><input type="checkbox" id="selectAll" onchange="toggleAll()"></th>
+  <th style="min-width:160px">SKU / Link</th>
+  <th style="min-width:140px">Product</th>
+  <th style="width:50px;text-align:center">Phase</th>
+  <th style="width:80px;text-align:center">Current 🖼️</th>
+  <th style="width:80px;text-align:center">Next 🖼️</th>
+  <th style="min-width:100px">Next Time</th>
+  <th style="width:85px">Status</th>
+  <th style="width:75px;text-align:center">Action</th>
+</tr></thead>
 <tbody id="tbList"></tbody></table></div></div>
 
-<!-- ADD -->
+<!-- ADD TAB -->
 <div id="tAdd" class="tc">
 <div class="g2">
 <div>
-  <label>SKU ID</label>
-  <input id="fSku" placeholder="B0961005_S_4891609702053">
-  <div class="row"><button class="btn btn-blue btn-sm" onclick="fetchName()">🔍 Fetch Name</button><button class="btn btn-green btn-sm" onclick="saveSku()">💾 Save SKU</button></div>
-  <label>Product Name</label>
+  <label style="font-weight:600;font-size:0.8rem;color:#aaa;display:block;margin-bottom:4px">🔑 SKU ID</label>
+  <input id="fSku" placeholder="B0961005_S_4891609702053" style="font-family:monospace">
+  <div class="row" style="margin-bottom:8px">
+    <button class="btn btn-blue btn-sm" onclick="fetchName()">🔍 Fetch Name</button>
+    <button class="btn btn-green btn-sm" onclick="saveSku()">💾 Save SKU</button>
+  </div>
+  <label style="font-weight:600;font-size:0.8rem;color:#aaa;display:block;margin-bottom:4px">📛 Product Name</label>
   <input id="fName" placeholder="Auto or manual">
 </div>
 <div>
-  <label>🔁 Delete Phase (0-based index)</label>
-  <div class="row"><input id="fDelIdx" placeholder="e.g. 2" style="flex:1"><button class="btn btn-sm" style="background:#e94560;color:#fff" onclick="delPhase()">🗑️ Delete</button></div>
+  <label style="font-weight:600;font-size:0.8rem;color:#aaa;display:block;margin-bottom:4px">🔁 Delete Phase</label>
+  <div class="row"><input id="fDelIdx" placeholder="e.g. 2 (0-based index)" style="flex:1"><button class="btn btn-sm" style="background:#e94560;color:#fff" onclick="delPhase()">🗑️ Delete</button></div>
 </div>
 </div>
-<h4 style="color:#ffd700;margin:10px 0 5px">📸 Phases <button class="btn btn-sm btn-blue" onclick="addPhase()">➕ Add Phase</button></h4>
+<h4 style="color:#ffd700;margin:14px 0 8px;font-size:0.9rem">📸 Phases <button class="btn btn-sm btn-blue" onclick="addPhase()">➕ Add Phase</button></h4>
 <div id="phasesContainer"></div>
 </div>
 
-<!-- LOG -->
+<!-- LOG TAB -->
 <div id="tLog" class="tc">
-<div class="row" style="padding:0 0 10px 0">
+<div class="toolbar-row">
   <button class="btn btn-sm" style="background:#e94560;color:#fff" onclick="batchDeleteLog()">🗑️ Delete Selected</button>
-  <span style="color:#888;font-size:0.75rem">(checkbox selects history entries)</span>
+  <span style="color:#666;font-size:0.75rem">(check histories to batch delete)</span>
 </div>
 <div class="scroll">
 <table>
-<thead><tr><th style="width:3%"><input type="checkbox" id="selectAllLog" onchange="toggleAllLog()"></th><th>Time</th><th>SKU</th><th>Phase</th><th>Photo</th><th>Result</th></tr></thead>
+<thead><tr>
+  <th style="width:32px;text-align:center"><input type="checkbox" id="selectAllLog" onchange="toggleAllLog()"></th>
+  <th style="min-width:130px">Time</th>
+  <th style="min-width:160px">SKU</th>
+  <th style="min-width:100px">Phase</th>
+  <th>Photo</th>
+  <th style="width:70px;text-align:center">Result</th>
+  <th style="width:45px;text-align:center">Del</th>
+</tr></thead>
 <tbody id="tbLog"></tbody></table></div></div></div>
 
-<div class="footer"><span style="color:#e94560;font-weight:bold">🖼️ Bubble Photos Dashboard</span><span style="color:#333;margin:0 8px">|</span><span style="color:#ffd700">Click photo to enlarge · HKTVmall link · Batch delete</span></div></div>
+<!-- FOOTER -->
+<div class="footer">
+  <span style="color:#e94560;font-weight:bold">🖼️ Bubble Photos Dashboard</span>
+  <span style="color:#333;margin:0 8px">|</span>
+  <span style="color:#ffd700">Click photo to enlarge</span>
+  <span style="color:#333;margin:0 8px">·</span>
+  <span style="color:#3498db">HKTVmall link</span>
+  <span style="color:#333;margin:0 8px">·</span>
+  <span style="color:#e94560">Batch delete</span>
+</div>
+</div>
 
 <script>
 var R='FIFICHECK/bubble-photos-dashboard',B='master',CU='https://raw.githubusercontent.com/'+R+'/'+B+'/config.json',DU='https://raw.githubusercontent.com/'+R+'/'+B+'/dashboard_data.json',TK=('ghp_'+'***REMOVED***')
@@ -179,11 +302,14 @@ function upd(){
 
 function openImg(url){document.getElementById('imgModalContent').src=url;document.getElementById('imgModal').classList.add('active')}
 function closeImgViewer(){document.getElementById('imgModal').classList.remove('active')}
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeImgViewer()})
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeImgViewer();closeHelp()}})
+
+function toggleHelp(){var el=document.getElementById('helpModal');if(el.classList.contains('active'))el.classList.remove('active');else el.classList.add('active')}
+function closeHelp(){document.getElementById('helpModal').classList.remove('active')}
 
 function imgHtml(url,size){
   if(!url)return '<div class="preview na">--</div>'
-  var s=size||50
+  var s=size||48
   return '<img class="preview" src="'+esc(url)+'" style="width:'+s+'px;height:'+s+'px" onclick="openImg(\''+esc(url)+'\')" onerror="this.style.display=\'none\'" title="Click to enlarge">'
 }
 
@@ -200,7 +326,7 @@ function nextUp(sk){
 }
 
 function render(){
-  var tb=document.getElementById('tbList');if(!C||!C.skus||Object.keys(C.skus).length===0){tb.innerHTML='<tr><td colspan="10" class="empty">No SKUs</td></tr>';return}
+  var tb=document.getElementById('tbList');if(!C||!C.skus||Object.keys(C.skus).length===0){tb.innerHTML='<tr><td colspan="10" class="empty">No SKUs yet. Go to ➕ Add SKU tab to create one.</td></tr>';return}
   var q=(document.getElementById('search').value||'').toLowerCase(),h=''
   Object.keys(C.skus).forEach(function(k){
     var s=C.skus[k];if(q&&k.indexOf(q)===-1&&(s.product_name||'').indexOf(q)===-1)return
@@ -213,15 +339,15 @@ function render(){
     var bc='badge '+s.status,bt=s.status==='active'?'🟢 Active':s.status==='completed'?'🔵 Done':s.status==='failed'?'❌ Fail':'⏳ Pending'
     var skuLink='https://www.hktvmall.com/hktv/p/'+k
     h+='<tr>'
-    h+='<td><input type="checkbox" class="skuSel" data-sku="'+esc(k)+'"></td>'
-    h+='<td><code style="font-size:0.7rem"><a class="sku-link" href="'+skuLink+'" target="_blank" title="Open in HKTVmall">'+esc(k)+' ↗</a></code></td>'
-    h+='<td style="font-size:0.75rem">'+esc(s.product_name||'--')+'</td>'
-    h+='<td style="font-size:0.7rem">'+(cur+1)+'/'+ph.length+'</td>'
-    h+='<td>'+imgHtml(curUrl)+(curUrl?'':'<div class="preview na">--</div>')+'</td>'
-    h+='<td>'+imgHtml(nextUrl,50)+(nextUrl?'':'<div class="preview na">--</div>')+'</td>'
-    h+='<td style="font-size:0.8rem;color:#e0e0e0;white-space:nowrap">'+nextTime+'<br><span style="color:#e0e0e0;font-size:0.7rem">'+nextLbl+'</span></td>'
+    h+='<td style="text-align:center"><input type="checkbox" class="skuSel" data-sku="'+esc(k)+'"></td>'
+    h+='<td><code style="font-size:0.75rem"><a class="sku-link" href="'+skuLink+'" target="_blank" title="Open in HKTVmall">'+esc(k)+' ↗</a></code></td>'
+    h+='<td style="font-size:0.8rem;color:#e0e0e0">'+esc(s.product_name||'<span style="color:#555">--</span>')+'</td>'
+    h+='<td style="text-align:center;font-size:0.8rem;font-weight:600;color:#ffd700">'+(cur+1)+'/'+ph.length+'</td>'
+    h+='<td style="text-align:center">'+imgHtml(curUrl)+(curUrl?'':'<div class="preview na">--</div>')+'</td>'
+    h+='<td style="text-align:center">'+imgHtml(nextUrl,48)+(nextUrl?'':'<div class="preview na">--</div>')+'</td>'
+    h+='<td style="font-size:0.8rem;color:#e0e0e0;white-space:nowrap">'+nextTime+'<br><span style="color:#aaa;font-size:0.7rem">'+nextLbl+'</span></td>'
     h+='<td><span class="'+bc+'">'+bt+'</span></td>'
-    h+='<td><div class="row" style="gap:4px"><button class="btn btn-sm btn-blue" style="padding:2px 6px" onclick="editSku(\''+esc(k)+'\')">✎</button><button class="btn btn-sm" style="background:#e94560;color:#fff;padding:2px 6px" onclick="deleteSku(\''+esc(k)+'\')">✕</button></div></td>'
+    h+='<td style="text-align:center"><div class="row" style="gap:4px;justify-content:center"><button class="btn btn-sm btn-blue" style="padding:4px 8px" onclick="editSku(\''+esc(k)+'\')">✎</button><button class="btn btn-sm" style="background:#e94560;color:#fff;padding:4px 8px" onclick="deleteSku(\''+esc(k)+'\')">✕</button></div></td>'
     h+='</tr>'
   })
   tb.innerHTML=h||'<tr><td colspan="10" class="empty">No matches</td></tr>'
@@ -229,14 +355,14 @@ function render(){
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 
-// ========== FETCH NAME (via backend) ==========
+// ========== FETCH NAME ==========
 function fetchName(){
   var sk=document.getElementById('fSku').value.trim();if(!sk){msg('Enter SKU',true);return}
-  msg('⏳ Trying to fetch product name...')
-  var proxies = ['https://api.allorigins.win/raw?url=','https://corsproxy.io/?']
+  msg('⏳ Fetching product name...')
+  var proxies=['https://api.allorigins.win/raw?url=','https://corsproxy.io/?']
   var url='https://www.hktvmall.com/hktv/p/'+encodeURIComponent(sk)
   function tryProxy(idx){
-    if(idx>=proxies.length){msg('⚠️ Fetch failed. Enter name manually, or it will be auto-fetched by backend on next update.',true);return}
+    if(idx>=proxies.length){msg('⚠️ Fetch failed. Enter manually or backend will auto-fetch.',true);return}
     fetch(proxies[idx]+url).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.text()}).then(function(h){
       var m=h.match(/<title>([^<]+)<\/title>/i);
       if(m){var n=m[1].replace(/\s*\|\s*HKTVmall.*$/,'').trim();document.getElementById('fName').value=n;msg('✅ '+n)}
@@ -254,11 +380,11 @@ function renderPhases(phases){
   for(var i=0;i<phases.length;i++){
     var p=phases[i]
     h+='<div class="phase-row">'
-    h+='<div><label>Phase '+(i+1)+' Label</label><input class="phLbl" data-i="'+i+'" value="'+esc(p.label||'')+'" placeholder="e.g. 🟢 波波圖"></div>'
-    h+='<div><label>Photo URL '+imgHtml(p.photo_url||'',50)+'</label><input class="phUrl" data-i="'+i+'" value="'+esc(p.photo_url||'')+'" placeholder="https://..."></div>'
-    h+='<div><label>Time</label><input class="phTime" data-i="'+i+'" type="datetime-local" value="'+(p.time?p.time.slice(0,16):'')+'"></div>'
-    h+='<div style="display:flex;gap:4px;align-items:end;padding-bottom:8px">'
-    h+='<button class="btn btn-sm" style="background:#e94560;color:#fff;padding:2px 8px" onclick="removePhase('+i+')">✕</button>'
+    h+='<div><label>Phase '+(i+1)+'</label><input class="phLbl" data-i="'+i+'" value="'+esc(p.label||'')+'" placeholder="e.g. 🟢 波波圖"></div>'
+    h+='<div><label>Photo URL '+imgHtml(p.photo_url||'',48)+'</label><input class="phUrl" data-i="'+i+'" value="'+esc(p.photo_url||'')+'" placeholder="https://lh3.googleusercontent.com/d/..."></div>'
+    h+='<div><label>Date / Time</label><input class="phTime" data-i="'+i+'" type="datetime-local" value="'+(p.time?p.time.slice(0,16):'')+'"></div>'
+    h+='<div style="display:flex;gap:4px;align-items:end;padding-bottom:4px">'
+    h+='<button class="btn btn-sm" style="background:#e94560;color:#fff;padding:4px 10px" onclick="removePhase('+i+')">✕</button>'
     h+='</div></div>'
   }
   el.innerHTML=h
@@ -308,31 +434,28 @@ function editSku(sku){
 // ========== LOG ==========
 function renderLog(){
   var tb=document.getElementById('tbLog'),h=(D&&D.history)||[]
-  if(h.length===0){tb.innerHTML='<tr><td colspan="7" class="empty">No activity</td></tr>';return}
+  if(h.length===0){tb.innerHTML='<tr><td colspan="7" class="empty">No activity yet</td></tr>';return}
   var html=''
   h.slice(-100).reverse().forEach(function(x, idx){
     var bc='badge '+(x.status==='success'?'active':'failed'),bt=x.status==='success'?'✅ OK':'❌ Fail'
     html+='<tr>'
-    html+='<td><input type="checkbox" class="logSel" data-idx="'+idx+'"></td>'
-    html+='<td style="font-size:0.7rem;color:#888">'+(x.time||'--')+'</td>'
-    html+='<td><code style="color:#3498db;font-size:0.7rem">'+esc(x.sku)+'</code></td>'
-    html+='<td style="font-size:0.75rem">'+esc(x.label||x.action||'--')+'</td>'
-    html+='<td style="font-size:0.7rem;color:#888;word-break:break-all">'+esc(x.photo||'--')+'</td>'
-    html+='<td><span class="'+bc+'">'+bt+'</span></td>'
-    html+='<td><button class="btn btn-sm" style="background:#e94560;color:#fff;padding:2px 6px" onclick="deleteLog('+idx+')">✕</button></td>'
+    html+='<td style="text-align:center"><input type="checkbox" class="logSel" data-idx="'+idx+'"></td>'
+    html+='<td style="font-size:0.75rem;color:#888">'+(x.time||'--')+'</td>'
+    html+='<td><code style="color:#3498db;font-size:0.75rem">'+esc(x.sku)+'</code></td>'
+    html+='<td style="font-size:0.8rem">'+esc(x.label||x.action||'--')+'</td>'
+    html+='<td style="font-size:0.75rem;color:#888;word-break:break-all">'+esc(x.photo||'--')+'</td>'
+    html+='<td style="text-align:center"><span class="'+bc+'">'+bt+'</span></td>'
+    html+='<td style="text-align:center"><button class="btn btn-sm" style="background:#e94560;color:#fff;padding:2px 8px" onclick="deleteLog('+idx+')">✕</button></td>'
     html+='</tr>'
   })
   tb.innerHTML=html
 }
 
-// ========== DELETE SKU ==========
+// ========== DELETE ==========
 function deleteSku(sku){
   if(!confirm('Delete SKU "'+sku+'"?'))return
-  var c=JSON.parse(JSON.stringify(C))
-  delete c.skus[sku]
-  save(c)
+  var c=JSON.parse(JSON.stringify(C));delete c.skus[sku];save(c)
 }
-
 function batchDeleteSkus(){
   var cbs=document.querySelectorAll('.skuSel:checked')
   if(cbs.length===0){msg('Select SKUs to delete',true);return}
@@ -341,54 +464,37 @@ function batchDeleteSkus(){
   cbs.forEach(function(cb){delete c.skus[cb.getAttribute('data-sku')]})
   save(c)
 }
-
 function toggleAll(){
   var checked=document.getElementById('selectAll').checked
   document.querySelectorAll('.skuSel').forEach(function(cb){cb.checked=checked})
 }
-
 function toggleAllLog(){
   var checked=document.getElementById('selectAllLog').checked
   document.querySelectorAll('.logSel').forEach(function(cb){cb.checked=checked})
 }
-
 function deleteLog(idx){
   if(!confirm('Delete this log entry?'))return
-  var d2=JSON.parse(JSON.stringify(D||{history:[]}))
-  var h=d2.history||[]
-  var realIdx=h.length-1-idx
-  h.splice(realIdx,1)
-  d2.history=h
-  saveData(d2)
+  var d2=JSON.parse(JSON.stringify(D||{history:[]}));var h=d2.history||[]
+  h.splice(h.length-1-idx,1);d2.history=h;saveData(d2)
 }
-
 function batchDeleteLog(){
   var cbs=document.querySelectorAll('.logSel:checked')
   if(cbs.length===0){msg('Select log entries',true);return}
-  if(!confirm('Delete '+cbs.length+' log entry(ies)?'))return
-  var d2=JSON.parse(JSON.stringify(D||{history:[]}))
-  var h=d2.history||[]
-  var idxes=[]
-  cbs.forEach(function(cb){idxes.push(parseInt(cb.getAttribute('data-idx')))})
+  if(!confirm('Delete '+cbs.length+' entry(ies)?'))return
+  var d2=JSON.parse(JSON.stringify(D||{history:[]}));var h=d2.history||[]
+  var idxes=[];cbs.forEach(function(cb){idxes.push(parseInt(cb.getAttribute('data-idx')))})
   idxes.sort(function(a,b){return b-a})
-  idxes.forEach(function(idx){
-    var realIdx=h.length-1-idx
-    h.splice(realIdx,1)
-  })
-  d2.history=h
-  saveData(d2)
+  idxes.forEach(function(idx){h.splice(h.length-1-idx,1)})
+  d2.history=h;saveData(d2)
 }
-
 function saveData(d,cb){
   function doSave(attempt){
     fetch('https://api.github.com/repos/'+R+'/contents/dashboard_data.json?ref='+B,{headers:{'Authorization':'token '+TK,'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.json()}).then(function(i){
       var s=i.sha||''
       fetch('https://api.github.com/repos/'+R+'/contents/dashboard_data.json',{method:'PUT',headers:{'Authorization':'token '+TK,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update dashboard data',content:btoa(unescape(encodeURIComponent(JSON.stringify(d,null,2)))),sha:s,branch:B})}).then(function(r){
-        if(r.ok)return r.json();
-        return r.json().then(function(e){throw new Error((e.message||'unknown')+' (attempt '+(attempt+1)+')')});
+        if(r.ok)return r.json();return r.json().then(function(e){throw new Error((e.message||'unknown')+' (attempt '+(attempt+1)+')')});
       }).then(function(r){msg('✅ Done!');if(cb)cb();fetchD()}).catch(function(e){
-        if(attempt<5){setTimeout(function(){doSave(attempt+1)},1500)}
-        else msg('❌ Delete failed after 5 attempts',true)
+        if(attempt<5){setTimeout(function(){doSave(attempt+1)},1500)}else msg('❌ Delete failed after 5 attempts',true)
       })
     }).catch(function(e){if(attempt<5){setTimeout(function(){doSave(attempt+1)},1500)}else msg('❌ SHA fetch failed: '+e.message,true)})
   }

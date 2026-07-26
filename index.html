@@ -154,7 +154,21 @@ function fetchD(){Promise.all([fetch(CU).then(function(r){if(!r.ok)throw Error('
 
 function msg(t,e){var el=document.getElementById('msg');el.textContent=t;el.className='msg '+(e?'err':'ok');el.style.display='block';setTimeout(function(){el.style.display='none'},4000)}
 
-function save(c,cb){fetch('https://api.github.com/repos/'+R+'/contents/config.json?ref='+B,{headers:{'Authorization':'token '+TK,'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.json()}).then(function(i){var s=i.sha||'';fetch('https://api.github.com/repos/'+R+'/contents/config.json',{method:'PUT',headers:{'Authorization':'token '+TK,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update config',content:btoa(unescape(encodeURIComponent(JSON.stringify(c,null,2)))),sha:s,branch:B})}).then(function(r){return r.json()}).then(function(r){if(r.content){msg('✅ Saved!');if(cb)cb();fetchD()}else msg('❌ '+(r.message||'unknown'),true)}).catch(function(e){msg('❌ '+e.message,true)})}).catch(function(e){msg('❌ SHA: '+e.message,true)})}
+function save(c,cb){
+  function doSave(attempt){
+    fetch('https://api.github.com/repos/'+R+'/contents/config.json?ref='+B,{headers:{'Authorization':'token '+TK,'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.json()}).then(function(i){
+      var s=i.sha||''
+      fetch('https://api.github.com/repos/'+R+'/contents/config.json',{method:'PUT',headers:{'Authorization':'token '+TK,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update config',content:btoa(unescape(encodeURIComponent(JSON.stringify(c,null,2)))),sha:s,branch:B})}).then(function(r){
+        if(r.ok)return r.json();
+        return r.json().then(function(e){throw new Error((e.message||'unknown')+' (attempt '+(attempt+1)+')')});
+      }).then(function(r){msg('✅ Saved!');if(cb)cb();fetchD()}).catch(function(e){
+        if(attempt<2){setTimeout(function(){doSave(attempt+1)},500)}
+        else msg('❌ '+e.message,true)
+      })
+    }).catch(function(e){if(attempt<2){setTimeout(function(){doSave(attempt+1)},500)}else msg('❌ SHA: '+e.message,true)})
+  }
+  doSave(0)
+}
 
 function upd(){
   if(!C)return;var sk=Object.keys(C.skus||{});var t=sk.length,a=0,d=0,p=0;
@@ -385,10 +399,19 @@ function batchDeleteLog(){
 }
 
 function saveData(d,cb){
-  fetch('https://api.github.com/repos/'+R+'/contents/dashboard_data.json?ref='+B,{headers:{'Authorization':'token '+TK,'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.json()}).then(function(i){
-    var s=i.sha||''
-    fetch('https://api.github.com/repos/'+R+'/contents/dashboard_data.json',{method:'PUT',headers:{'Authorization':'token '+TK,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update dashboard data',content:btoa(unescape(encodeURIComponent(JSON.stringify(d,null,2)))),sha:s,branch:B})}).then(function(r){return r.json()}).then(function(r){if(r.content){msg('✅ Deleted!');if(cb)cb();fetchD()}else msg('❌ '+(r.message||'unknown'),true)}).catch(function(e){msg('❌ '+e.message,true)})
-  }).catch(function(e){msg('❌ SHA: '+e.message,true)})
+  function doSave(attempt){
+    fetch('https://api.github.com/repos/'+R+'/contents/dashboard_data.json?ref='+B,{headers:{'Authorization':'token '+TK,'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.json()}).then(function(i){
+      var s=i.sha||''
+      fetch('https://api.github.com/repos/'+R+'/contents/dashboard_data.json',{method:'PUT',headers:{'Authorization':'token '+TK,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update dashboard data',content:btoa(unescape(encodeURIComponent(JSON.stringify(d,null,2)))),sha:s,branch:B})}).then(function(r){
+        if(r.ok)return r.json();
+        return r.json().then(function(e){throw new Error((e.message||'unknown')+' (attempt '+(attempt+1)+')')});
+      }).then(function(r){msg('✅ Done!');if(cb)cb();fetchD()}).catch(function(e){
+        if(attempt<2){setTimeout(function(){doSave(attempt+1)},500)}
+        else msg('❌ '+e.message,true)
+      })
+    }).catch(function(e){if(attempt<2){setTimeout(function(){doSave(attempt+1)},500)}else msg('❌ SHA: '+e.message,true)})
+  }
+  doSave(0)
 }
 
 // ========== TABS ==========

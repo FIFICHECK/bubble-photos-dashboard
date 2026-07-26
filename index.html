@@ -340,7 +340,7 @@ function render(){
     var skuLink='https://www.hktvmall.com/hktv/p/'+k
     h+='<tr>'
     h+='<td style="text-align:center"><input type="checkbox" class="skuSel" data-sku="'+esc(k)+'"></td>'
-    h+='<td><code style="font-size:0.75rem"><a class="sku-link" href="'+skuLink+'" target="_blank" title="Open in HKTVmall">'+esc(k)+' ↗</a></code></td>'
+    h+='<td><code style="font-size:0.75rem"><a class="sku-link" href="'+skuLink+'" target="_blank" title="Open in HKTVmall">'+esc(k)+'</a></code></td>'
     h+='<td style="font-size:0.8rem;color:#e0e0e0">'+esc(s.product_name||'<span style="color:#555">--</span>')+'</td>'
     h+='<td style="text-align:center;font-size:0.8rem;font-weight:600;color:#ffd700">'+(cur+1)+'/'+ph.length+'</td>'
     h+='<td style="text-align:center">'+imgHtml(curUrl)+(curUrl?'':'<div class="preview na">--</div>')+'</td>'
@@ -441,7 +441,7 @@ function renderLog(){
     html+='<tr>'
     html+='<td style="text-align:center"><input type="checkbox" class="logSel" data-idx="'+idx+'"></td>'
     html+='<td style="font-size:0.75rem;color:#888">'+(x.time||'--')+'</td>'
-    html+='<td><code style="color:#3498db;font-size:0.75rem">'+esc(x.sku)+'</code></td>'
+    html+='<td><code style="color:#3498db;font-size:0.75rem"><a class="sku-link" href="https://www.hktvmall.com/hktv/p/'+esc(x.sku)+'" target="_blank">'+esc(x.sku)+'</a></code></td>'
     html+='<td style="font-size:0.8rem">'+esc(x.label||x.action||'--')+'</td>'
     html+='<td style="font-size:0.75rem;color:#888;word-break:break-all">'+esc(x.photo||'--')+'</td>'
     html+='<td style="text-align:center"><span class="'+bc+'">'+bt+'</span></td>'

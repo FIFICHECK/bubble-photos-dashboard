@@ -404,7 +404,22 @@ function collectPhases(){
   return phases
 }
 
-function addPhase(){var p=collectPhases();p.push({time:'',photo_url:'',label:'Phase '+(p.length+1)});renderPhases(p)}
+function addPhase(){
+  var p=collectPhases()
+  var defaults=[
+    {label:'🟢 波波圖',time:'',photo_url:''},
+    {label:'🟠 85折後波波圖',time:'',photo_url:''},
+    {label:'🟢 波波圖',time:'',photo_url:''},
+    {label:'🔵 原圖',time:'',photo_url:''}
+  ]
+  if(p.length===0){
+    // Add all 4 defaults at once
+    defaults.forEach(function(d){p.push({label:d.label,time:'',photo_url:''})})
+  } else {
+    p.push({time:'',photo_url:'',label:'Phase '+(p.length+1)})
+  }
+  renderPhases(p)
+}
 function removePhase(idx){var p=collectPhases();if(p.length<=1){msg('Need at least 1 phase',true);return}p.splice(idx,1);renderPhases(p)}
 function delPhase(){var idx=parseInt(document.getElementById('fDelIdx').value);if(isNaN(idx)){msg('Enter phase index',true);return}removePhase(idx)}
 

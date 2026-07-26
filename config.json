@@ -24,9 +24,9 @@
           "time": "2026-07-30T23:55:00"
         }
       ],
-      "current_phase": -1,
-      "status": "failed",
-      "_next_phase": 0
+      "current_phase": 0,
+      "status": "active",
+      "last_updated": "2026-07-26T18:52:33.264975"
     }
   }
 }

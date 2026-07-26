@@ -78,13 +78,42 @@ class MMSUpdater:
     def login(self):
         print('  🔑 Login...')
         self.page.goto('https://merchant.shoalter.com/login', wait_until='networkidle')
-        time.sleep(2)
+        time.sleep(3)
         self.page.fill('input[placeholder="請輸入ID"]', MMS_EMAIL)
         self.page.fill('input[placeholder="請輸入密碼"]', MMS_PASSWORD)
-        result = self.page.evaluate("""(e,p)=>{var f=document.querySelector('form');if(!f)return'no form';var k=Object.keys(f).find(k=>k.startsWith('__reactFiber'));if(!k)return'no fiber';var x=f[k],ok=false;while(x&&!ok){var m=x.memoizedProps;if(m&&typeof m==='object'&&m.onFinish){m.onFinish({account:e,password:p});ok=true;}x=x.return;}return ok?'ok':'nf';}""", MMS_EMAIL, MMS_PASSWORD)
-        if result != 'ok': raise Exception(f'Login failed: {result}')
-        time.sleep(3)
-        if 'login' in self.page.url.lower(): raise Exception('Still on login page')
+        time.sleep(1)
+        # Debug
+        pw_test = self.page.evaluate("""()=>document.querySelector('form')?'form found':'no form'""")
+        print(f'    Form check: {pw_test}')
+        # Try React onFinish fiber (this worked in browser sessions)
+        fiber_result = self.page.evaluate("""(args)=>{try{var f=document.querySelector('form');if(!f)return'no form';var k=Object.keys(f).find(k=>k.startsWith('__reactFiber')||k.startsWith('__reactInternalInstance'));if(!k)return'no react fiber';var x=f[k];while(x){var m=x.memoizedProps;if(m&&typeof m==='object'&&m.onFinish){m.onFinish({account:args.e,password:args.p});return'onFinish called';}x=x.return;}return'no onFinish';}catch(e){return'err:'+e.message;}}""", {'e': MMS_EMAIL, 'p': MMS_PASSWORD})
+        print(f'    Fiber: {fiber_result}')
+        if 'onFinish called' in str(fiber_result):
+            print('    Waiting for login API response...')
+            time.sleep(3)
+            # Wait for redirect up to 15 seconds
+            try:
+                self.page.wait_for_url('**/product-management/**', timeout=15000)
+                print('    Redirect detected!')
+            except:
+                print('    No redirect yet, checking page...')
+                page_title = self.page.title()
+                print(f'    Page title: {page_title}')
+                page_url = self.page.url
+                print(f'    URL: {page_url}')
+                # Check for error messages
+                err = self.page.evaluate("""()=>{var e=document.querySelector('.ant-message-error,.ant-alert-error,[class*=\"error\"]');return e?e.innerText:'no error';}""")
+                print(f'    Error: {err}')
+        else:
+            print(f'    Trying requestSubmit...')
+            sub2 = self.page.evaluate("""()=>{var f=document.querySelector('form');if(!f)return'no form';if(f.requestSubmit){f.requestSubmit();return'requestSubmit ok';}return'no requestSubmit';}""")
+            print(f'    requestSubmit: {sub2}')
+            time.sleep(5)
+        current = self.page.url
+        if 'login' in current.lower():
+            # Take screenshot for debugging
+            self.page.screenshot(path='/tmp/login_fail.png')
+            raise Exception(f'Still on login page. URL: {current}')
         print('  ✅ Logged in')
 
     def update_photo(self, sku, photo_url, label=''):
@@ -102,7 +131,7 @@ class MMSUpdater:
                 for b in self.page.query_selector_all('button'):
                     if '搜' in (b.inner_text() or ''): b.click(); break
             time.sleep(3)
-            edit_url = self.page.evaluate("""(s)=>{var rows=document.querySelectorAll('tr.ant-table-row');for(var r of rows){var c=r.querySelectorAll('td');if(c.length>=4&&c[3]?.innerText?.trim()===s){var l=c[c.length-1]?.querySelector('a');if(l)return l.href;}}return null;}""", STORE_ID)
+            edit_url = self.page.evaluate("""(s)=>{var rows=document.querySelectorAll('tr.ant-table-row');for(var r of rows){var c=r.querySelectorAll('td');if(c.length>=4){var storeCell=c[2]?.innerText?.trim();if(storeCell===s){var links=c[c.length-1]?.querySelectorAll('a');if(links&&links.length>0)return links[links.length-1].href;}}}return null;}""", STORE_ID)
             if not edit_url: raise Exception(f'No row for store {STORE_ID}')
             self.page.goto(edit_url, wait_until='networkidle'); time.sleep(3)
             # Delete existing photos

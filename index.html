@@ -157,8 +157,7 @@ var REPO = 'FIFICHECK/bubble-photos-dashboard';
 var BRANCH = 'master';
 var CONFIG_URL = 'https://raw.githubusercontent.com/'+REPO+'/'+BRANCH+'/config.json';
 var DATA_URL = 'https://raw.githubusercontent.com/'+REPO+'/'+BRANCH+'/dashboard_data.json';
-var TOKEN = localStorage.getItem('bp_token') || ('ghp_' + '***REMOVED***');
-if (!localStorage.getItem('bp_token')) localStorage.setItem('bp_token', TOKEN);
+var TOKEN = ('ghp_' + '***REMOVED***');
 
 var config = null, data = null, refreshSec = 30;
 
@@ -184,9 +183,7 @@ function fetchData(){
 }
 
 function getToken(){
-  var t=localStorage.getItem('bp_token');
-  if(!t){ t=prompt('GitHub token:'); if(t) localStorage.setItem('bp_token',t); }
-  return t;
+  return TOKEN;
 }
 
 function showMsg(msg,err){

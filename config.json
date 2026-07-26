@@ -1,12 +1,13 @@
 {
-  "skus": [
-    "B0961005_S_4891609702053"
-  ],
-  "sku_photo_urls": {
-    "B0961005_S_4891609702053": "https://lh3.googleusercontent.com/d/1pq1npK-AoPSD13EL5Beq5khXTRmdUuQu"
-  },
-  "sku_periods": {},
-  "photo_update_cron": "0 6 * * *",
-  "last_updated": "",
-  "monitor_end": ""
+  "skus": {
+    "B0961005_S_4891609702053": {
+      "product_name": "",
+      "start_time": "",
+      "start_photo_url": "https://lh3.googleusercontent.com/d/1pq1npK-AoPSD13EL5Beq5khXTRmdUuQu",
+      "end_time": "",
+      "end_photo_url": "",
+      "status": "pending",
+      "last_updated": ""
+    }
+  }
 }

@@ -1,30 +1,27 @@
 #!/usr/bin/env python3
 """
-Bubble Photos Update — MMS Product Photo Auto-Updater
-Reads config.json from GitHub, logs into MMS 2.0, and updates main product photos.
+Bubble Photos Update v2 — Per-SKU scheduled photo swaps.
+Checks config.json, determines which SKUs need photo updates based on start/end times.
 """
 import os, sys, json, base64, time, re, requests
 from datetime import datetime
 from playwright.sync_api import sync_playwright
 
-# ======================== CONFIG ========================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 GITHUB_REPO = 'FIFICHECK/bubble-photos-dashboard'
 GITHUB_BRANCH = 'master'
-GITHUB_TOKEN = os.environ.get('BUBBLE_PHOTOS_TOKEN', '')
 MMS_EMAIL = 'jerry@hktv.com.hk'
 MMS_PASSWORD = 'JerRy111!!!!'
 STORE_ID = 'B0961005'
 
-# ======================== GITHUB HELPERS ========================
-GH_HEADERS = {
-    'Authorization': f'token {GITHUB_TOKEN}',
-    'Accept': 'application/vnd.github.v3+json'
-}
+def get_token():
+    return os.environ.get('BUBBLE_PHOTOS_TOKEN', '')
+
+GH_HEADERS = lambda: {'Authorization': f'token {get_token()}', 'Accept': 'application/vnd.github.v3+json'}
 GH_API = f'https://api.github.com/repos/{GITHUB_REPO}'
 
 def gh_get(path):
-    r = requests.get(f'{GH_API}/{path}', headers=GH_HEADERS)
+    r = requests.get(f'{GH_API}/{path}', headers=GH_HEADERS())
     r.raise_for_status()
     return r.json()
 
@@ -34,337 +31,240 @@ def gh_put(path, data, sha=None):
         'content': base64.b64encode(json.dumps(data, indent=2).encode()).decode(),
         'branch': GITHUB_BRANCH
     }
-    if sha:
-        payload['sha'] = sha
-    r = requests.put(f'{GH_API}/{path}', headers=GH_HEADERS, json=payload)
+    if sha: payload['sha'] = sha
+    r = requests.put(f'{GH_API}/{path}', headers=GH_HEADERS(), json=payload)
     r.raise_for_status()
     return r.json()
 
 def get_config():
-    info = gh_get('contents/config.json')
-    config = json.loads(base64.b64decode(info['content']).decode())
-    config['_sha'] = info['sha']
-    return config
+    try:
+        info = gh_get('contents/config.json')
+        config = json.loads(base64.b64decode(info['content']).decode())
+        config['_sha'] = info['sha']
+        return config
+    except Exception as e:
+        print(f'❌ Config fetch failed: {e}')
+        sys.exit(1)
 
 def get_dashboard_data():
     try:
         info = gh_get('contents/dashboard_data.json')
-        data = json.loads(base64.b64decode(info['content']).decode())
-        data['_sha'] = info['sha']
-        return data
+        d = json.loads(base64.b64decode(info['content']).decode())
+        d['_sha'] = info['sha']
+        return d
     except:
-        return {'all_skus': [], 'updated_skus': [], 'failed_skus': [], 'pending_skus': [], 'history': [], 'last_checked': '', 'total_updates': 0, 'successful_updates': 0, 'failed_updates': 0, '_sha': None}
+        return {'history': [], '_sha': None}
 
-def save_dashboard_data(data):
+def save_json(path, data):
     sha = data.pop('_sha', None)
-    result = gh_put('contents/dashboard_data.json', data, sha)
-    return result
+    gh_put(f'contents/{path}', data, sha)
 
-# ======================== MMS BROWSER AUTOMATION ========================
-class MMSPhotoUpdater:
+# ========== MMS BROWSER ==========
+class MMSUpdater:
     def __init__(self):
-        self.playwright = None
+        self.pw = None
         self.browser = None
         self.page = None
-        self.results = []
 
-    def start_browser(self):
-        self.playwright = sync_playwright().start()
-        self.browser = self.playwright.chromium.launch(headless=True)
+    def start(self):
+        self.pw = sync_playwright().start()
+        self.browser = self.pw.chromium.launch(headless=True)
         self.page = self.browser.new_page()
         self.page.set_viewport_size({'width': 1920, 'height': 1080})
 
-    def close_browser(self):
-        try:
-            if self.browser:
-                self.browser.close()
+    def stop(self):
+        try: self.browser.close()
         except: pass
-        try:
-            if self.playwright:
-                self.playwright.stop()
+        try: self.pw.stop()
         except: pass
 
     def login(self):
-        """Login to MMS 2.0 using React onFinish fiber technique"""
-        print('  🔑 Logging into MMS...')
+        print('  🔑 Login...')
         self.page.goto('https://merchant.shoalter.com/login', wait_until='networkidle')
         time.sleep(2)
-
-        # Fill credentials
         self.page.fill('input[placeholder="請輸入ID"]', MMS_EMAIL)
         self.page.fill('input[placeholder="請輸入密碼"]', MMS_PASSWORD)
-
-        # Use React onFinish fiber to bypass bot detection
-        result = self.page.evaluate("""
-            () => {
-                var formEl = document.querySelector('form');
-                if (!formEl) return 'no form';
-                var fiberKey = Object.keys(formEl).find(k => k.startsWith('__reactFiber'));
-                if (!fiberKey) return 'no fiber';
-                var fiber = formEl[fiberKey];
-                var loggedIn = false;
-                while (fiber && !loggedIn) {
-                    var p = fiber.memoizedProps;
-                    if (p && typeof p === 'object' && p.onFinish) {
-                        p.onFinish({
-                            account: arguments[0],
-                            password: arguments[1]
-                        });
-                        loggedIn = true;
-                    }
-                    fiber = fiber.return;
-                }
-                return loggedIn ? 'ok' : 'not found';
-            }
-        """, MMS_EMAIL, MMS_PASSWORD)
-
-        if result != 'ok':
-            raise Exception(f'Login failed: {result}')
-
+        result = self.page.evaluate("""(e,p)=>{var f=document.querySelector('form');if(!f)return'no form';var k=Object.keys(f).find(k=>k.startsWith('__reactFiber'));if(!k)return'no fiber';var x=f[k],ok=false;while(x&&!ok){var m=x.memoizedProps;if(m&&typeof m==='object'&&m.onFinish){m.onFinish({account:e,password:p});ok=true;}x=x.return;}return ok?'ok':'nf';}""", MMS_EMAIL, MMS_PASSWORD)
+        if result != 'ok': raise Exception(f'Login failed: {result}')
         time.sleep(3)
-        # Verify login success
-        current_url = self.page.url
-        if 'login' in current_url.lower():
-            raise Exception('Login failed - still on login page')
+        if 'login' in self.page.url.lower(): raise Exception('Still on login page')
+        print('  ✅ Logged in')
 
-        print('  ✅ Login successful')
-
-    def update_sku_photo(self, sku, photo_url):
-        """Update the main photo for a single SKU"""
-        print(f'  📸 Updating {sku}...')
+    def update_photo(self, sku, photo_url, action_label='start'):
+        """Update the main photo for a SKU"""
         sku_id = sku.split('_S_')[-1] if '_S_' in sku else sku
-
+        print(f'  📸 [{action_label}] {sku}...')
         try:
-            # Navigate to product list
             self.page.goto('https://merchant.shoalter.com/product-management/product-list', wait_until='networkidle')
             time.sleep(2)
-
-            # Search for SKU
-            search_input = self.page.query_selector('input[placeholder="搜尋 SKU ID"]')
-            if not search_input:
-                raise Exception('Search input not found')
-            search_input.fill('')
-            search_input.fill(sku_id)
+            inp = self.page.query_selector('input[placeholder="搜尋 SKU ID"]')
+            if not inp: raise Exception('Search input not found')
+            inp.fill('')
+            inp.fill(sku_id)
             time.sleep(0.5)
-
-            # Click search button
-            search_btn = self.page.query_selector('button:has-text("搜 索")')
-            if not search_btn:
-                search_btn = self.page.query_selector('button:has-text("搜尋")')
-            if search_btn:
-                search_btn.click()
+            sb = self.page.query_selector('button:has-text("搜 索")')
+            if sb: sb.click()
             else:
-                # Fallback: try all buttons
-                buttons = self.page.query_selector_all('button')
-                for btn in buttons:
-                    if '搜' in (btn.inner_text() or ''):
-                        btn.click()
-                        break
+                for b in self.page.query_selector_all('button'):
+                    if '搜' in (b.inner_text() or ''): b.click(); break
             time.sleep(3)
-
-            # Get the edit URL for our store
-            edit_url = self.page.evaluate("""
-                (targetStore) => {
-                    var rows = document.querySelectorAll('tr.ant-table-row');
-                    for (var row of rows) {
-                        var cells = row.querySelectorAll('td');
-                        if (cells.length >= 4) {
-                            var storeId = cells[3]?.innerText?.trim();
-                            if (storeId === targetStore) {
-                                var lastCell = cells[cells.length - 1];
-                                var link = lastCell?.querySelector('a');
-                                if (link) return link.href;
-                            }
-                        }
-                    }
-                    return null;
-                }
-            """, STORE_ID)
-
-            if not edit_url:
-                raise Exception(f'No matching row found for store {STORE_ID}')
-
-            # Navigate to edit page
+            # Get edit URL
+            edit_url = self.page.evaluate("""(s)=>{var rows=document.querySelectorAll('tr.ant-table-row');for(var r of rows){var c=r.querySelectorAll('td');if(c.length>=4&&c[3]?.innerText?.trim()===s){var l=c[c.length-1]?.querySelector('a');if(l)return l.href;}}return null;}""", STORE_ID)
+            if not edit_url: raise Exception(f'No row for store {STORE_ID}')
             self.page.goto(edit_url, wait_until='networkidle')
             time.sleep(3)
-
-            # Delete existing main photo
-            deleted = self.page.evaluate("""
-                () => {
-                    var deleteBtns = document.querySelectorAll('[class*="ant-upload-list-item"] [class*="delete"], [aria-label="delete"]');
-                    for (var btn of deleteBtns) {
-                        btn.click();
-                        return true;
-                    }
-                    // Try finding delete by icon
-                    var icons = document.querySelectorAll('.anticon-delete');
-                    for (var icon of icons) {
-                        var btn = icon.closest('button') || icon.parentElement;
-                        if (btn) { btn.click(); return true; }
-                    }
-                    return false;
-                }
-            """)
-            print(f'    🗑️ Photo deleted: {deleted}')
+            # Delete existing photos
+            self.page.evaluate("""()=>{var d=document.querySelectorAll('[class*=\"ant-upload-list-item\"] [class*=\"delete\"],[aria-label=\"delete\"],.anticon-delete');for(var b of d){var btn=b.closest('button')||b.parentElement;if(btn){btn.click();}}return true;}""")
             time.sleep(1)
-
-            # Fetch photo from URL and upload
-            upload_result = self.page.evaluate("""
-                async (url) => {
-                    try {
-                        var resp = await fetch(url);
-                        if (!resp.ok) return 'fetch failed: HTTP ' + resp.status;
-                        var blob = await resp.blob();
-                        var file = new File([blob], 'product_photo.jpg', { type: blob.type || 'image/jpeg' });
-                        var fileInputs = document.querySelectorAll('input[type="file"]');
-                        if (!fileInputs || fileInputs.length === 0) return 'no file input';
-                        var target = fileInputs[0];
-                        var dt = new DataTransfer();
-                        dt.items.add(file);
-                        target.files = dt.files;
-                        target.dispatchEvent(new Event('change', { bubbles: true }));
-                        return 'uploaded:' + file.size;
-                    } catch(e) {
-                        return 'error:' + e.message;
-                    }
-                }
-            """, photo_url)
-            print(f'    📤 Upload result: {upload_result}')
-
-            if upload_result and upload_result.startswith('uploaded:'):
+            # Upload photo from URL
+            result = self.page.evaluate("""async(u)=>{try{var r=await fetch(u);if(!r.ok)return'fetch fail:'+r.status;var b=await r.blob();var f=new File([b],'photo.jpg',{type:b.type||'image/jpeg'});var fi=document.querySelectorAll('input[type=\"file\"]');if(!fi||!fi[0])return'no input';var dt=new DataTransfer();dt.items.add(f);fi[0].files=dt.files;fi[0].dispatchEvent(new Event('change',{bubbles:true}));return'ok:'+f.size;}catch(e){return'err:'+e.message;}}""", photo_url)
+            print(f'    Upload: {result}')
+            if 'ok:' in result:
                 time.sleep(2)
-
-                # Click "完成" (Done) button
-                done_clicked = self.page.evaluate("""
-                    () => {
-                        var allBtns = document.querySelectorAll('button');
-                        for (var btn of allBtns) {
-                            if (btn.innerText.trim() === '完 成') {
-                                btn.click();
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
-                """)
-                print(f'    ✅ Done button clicked: {done_clicked}')
+                # Click Done
+                done = self.page.evaluate("""()=>{var b=document.querySelectorAll('button');for(var x of b){if(x.innerText.trim()==='完 成'){x.click();return true;}}return false;}""")
+                print(f'    Done: {done}')
                 time.sleep(3)
-
-                return {'sku': sku, 'status': 'success', 'message': 'Photo updated successfully'}
-            else:
-                return {'sku': sku, 'status': 'failed', 'message': str(upload_result)}
-
+                return True
+            return False
         except Exception as e:
-            print(f'    ❌ Error: {e}')
-            return {'sku': sku, 'status': 'failed', 'message': str(e)}
+            print(f'    ❌ {e}')
+            return False
 
-    def run(self, skus_to_update):
-        """Run updates for a list of SKUs"""
-        self.start_browser()
+    def run(self, actions):
+        """actions: list of (sku, photo_url, action_label)"""
+        if not actions: return []
+        self.start()
+        results = []
         try:
             self.login()
-            for sku, photo_url in skus_to_update:
-                result = self.update_sku_photo(sku, photo_url)
-                self.results.append(result)
+            for sku, url, label in actions:
+                ok = self.update_photo(sku, url, label)
+                results.append({'sku': sku, 'action': label, 'success': ok})
                 time.sleep(2)
         finally:
-            self.close_browser()
-        return self.results
+            self.stop()
+        return results
 
-# ======================== MAIN ========================
+# ========== MAIN ==========
 def main():
-    print('🖼️ Bubble Photos Update — Starting...')
-    print(f'⏰ {datetime.now().isoformat()}')
+    print('🖼️ Bubble Photos v2 — Checking schedules...')
+    now = datetime.now()
+    print(f'⏰ {now.isoformat()}')
 
-    # Load config
-    print('📥 Loading config from GitHub...')
     config = get_config()
-    skus = config.get('skus', [])
-    photo_urls = config.get('sku_photo_urls', {})
-
-    # Find SKUs that need updating (have photo URLs)
-    to_update = []
-    for sku in skus:
-        url = photo_urls.get(sku, '')
-        if url:
-            to_update.append((sku, url))
-
-    if not to_update:
-        print('✅ No SKUs with photo URLs to update')
+    skus = config.get('skus', {})
+    if not skus:
+        print('✅ No SKUs configured')
         return
 
-    print(f'📦 Found {len(to_update)} SKUs to update')
+    # Determine what actions to take
+    actions = []  # (sku, photo_url, label)
+    for sku, entry in skus.items():
+        status = entry.get('status', 'pending')
+        start_time = entry.get('start_time', '')
+        end_time = entry.get('end_time', '')
+        start_url = entry.get('start_photo_url', '')
+        end_url = entry.get('end_photo_url', '')
 
-    # Load existing dashboard data
+        # Skip if already completed
+        if status == 'completed':
+            print(f'  ⏭️ {sku}: already completed')
+            continue
+
+        # Check start time
+        if status == 'pending' and start_time:
+            try:
+                st = datetime.fromisoformat(start_time)
+                if now >= st:
+                    if start_url:
+                        print(f'  🟢 {sku}: START time reached')
+                        actions.append((sku, start_url, 'start'))
+                    else:
+                        print(f'  ⚠️ {sku}: START time reached but no start_photo_url')
+                else:
+                    mins = int((st - now).total_seconds() / 60)
+                    print(f'  ⏳ {sku}: Start in {mins} min')
+            except Exception as e:
+                print(f'  ⚠️ {sku}: bad start_time: {e}')
+
+        # Check end time (only if active or we just processed start)
+        if status == 'active' and end_time:
+            try:
+                et = datetime.fromisoformat(end_time)
+                if now >= et:
+                    if end_url:
+                        print(f'  🔴 {sku}: END time reached, swapping photo')
+                        actions.append((sku, end_url, 'end'))
+                    else:
+                        print(f'  ⚠️ {sku}: END time reached but no end_photo_url, marking completed')
+                        # Mark completed even without end photo
+                        skus[sku]['status'] = 'completed'
+                        skus[sku]['last_updated'] = now.isoformat()
+                else:
+                    mins = int((et - now).total_seconds() / 60)
+                    print(f'  🟢 {sku}: Active, end in {mins} min')
+            except Exception as e:
+                print(f'  ⚠️ {sku}: bad end_time: {e}')
+
+    if not actions:
+        # Still save any status changes (e.g. completed without end photo)
+        if any(s.get('status') == 'completed' for s in skus.values()):
+            config.pop('_sha', None)
+            save_json('config.json', config)
+            print('✅ Status updates saved')
+        else:
+            print('✅ No actions needed')
+        return
+
+    print(f'\n📦 {len(actions)} action(s) to process')
+
+    # Run browser updates
+    updater = MMSUpdater()
+    results = updater.run(actions)
+
+    # Update config + log
     dashboard = get_dashboard_data()
-    if 'all_skus' not in dashboard:
-        dashboard['all_skus'] = []
-    if 'updated_skus' not in dashboard:
-        dashboard['updated_skus'] = []
-    if 'failed_skus' not in dashboard:
-        dashboard['failed_skus'] = []
-    if 'pending_skus' not in dashboard:
-        dashboard['pending_skus'] = []
-    if 'history' not in dashboard:
-        dashboard['history'] = []
-    dashboard['last_checked'] = datetime.now().isoformat()
+    if 'history' not in dashboard: dashboard['history'] = []
 
-    # Run updates
-    updater = MMSPhotoUpdater()
-    results = updater.run(to_update)
+    for r in results:
+        sku = r['sku']
+        label = r['action']
+        ok = r['success']
 
-    # Process results
-    for result in results:
-        sku = result['sku']
-        status = result['status']
-        message = result.get('message', '')
-        product_name = result.get('product_name', '')
+        if sku in skus:
+            if ok:
+                if label == 'start':
+                    skus[sku]['status'] = 'active'
+                    # Check if end time already passed
+                    end_t = skus[sku].get('end_time', '')
+                    if end_t:
+                        try:
+                            if datetime.fromisoformat(end_t) <= now:
+                                skus[sku]['status'] = 'completed'
+                        except: pass
+                elif label == 'end':
+                    skus[sku]['status'] = 'completed'
+                skus[sku]['last_updated'] = now.isoformat()
+            else:
+                skus[sku]['status'] = 'failed'
 
-        # Add to history
         dashboard['history'].append({
             'sku': sku,
-            'status': status,
-            'message': message,
-            'product_name': product_name,
-            'checked_at': datetime.now().isoformat()
+            'action': label,
+            'photo': skus.get(sku, {}).get('end_photo_url' if label == 'end' else 'start_photo_url', ''),
+            'status': 'success' if ok else 'failed',
+            'time': now.isoformat()
         })
 
-        if status == 'success':
-            dashboard['updated_skus'] = [u for u in dashboard.get('updated_skus', []) if u.get('sku') != sku]
-            dashboard['updated_skus'].append({
-                'sku': sku,
-                'product_name': product_name,
-                'updated_at': datetime.now().isoformat()
-            })
-            dashboard['successful_updates'] = dashboard.get('successful_updates', 0) + 1
-        else:
-            dashboard['failed_skus'] = [u for u in dashboard.get('failed_skus', []) if u.get('sku') != sku]
-            dashboard['failed_skus'].append({
-                'sku': sku,
-                'product_name': product_name,
-                'message': message,
-                'checked_at': datetime.now().isoformat()
-            })
-            dashboard['failed_updates'] = dashboard.get('failed_updates', 0) + 1
-
-        # Update all_skus
-        dashboard['all_skus'] = [a for a in dashboard.get('all_skus', []) if a.get('sku') != sku]
-        dashboard['all_skus'].append({
-            'sku': sku,
-            'product_name': product_name,
-            'photo_url': photo_urls.get(sku, ''),
-            'status': status,
-            'last_checked': datetime.now().isoformat()
-        })
-
-    # Trim history to last 500 entries
+    # Trim history
     dashboard['history'] = dashboard['history'][-500:]
-    dashboard['total_updates'] = dashboard.get('total_updates', 0) + len(results)
 
-    # Save dashboard data
-    print('📤 Saving results to GitHub...')
-    save_dashboard_data(dashboard)
-    print('✅ Done!')
+    # Save
+    config.pop('_sha', None)
+    save_json('config.json', config)
+    save_json('dashboard_data.json', dashboard)
+    print('✅ All saved!')
 
 if __name__ == '__main__':
     main()

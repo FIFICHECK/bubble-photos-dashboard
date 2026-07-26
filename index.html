@@ -162,10 +162,10 @@ function save(c,cb){
         if(r.ok)return r.json();
         return r.json().then(function(e){throw new Error((e.message||'unknown')+' (attempt '+(attempt+1)+')')});
       }).then(function(r){msg('✅ Saved!');if(cb)cb();fetchD()}).catch(function(e){
-        if(attempt<2){setTimeout(function(){doSave(attempt+1)},500)}
-        else msg('❌ '+e.message,true)
+        if(attempt<5){setTimeout(function(){doSave(attempt+1)},1500)}
+        else msg('❌ Save failed after 5 attempts',true)
       })
-    }).catch(function(e){if(attempt<2){setTimeout(function(){doSave(attempt+1)},500)}else msg('❌ SHA: '+e.message,true)})
+    }).catch(function(e){if(attempt<5){setTimeout(function(){doSave(attempt+1)},1500)}else msg('❌ SHA fetch failed: '+e.message,true)})
   }
   doSave(0)
 }
@@ -406,10 +406,10 @@ function saveData(d,cb){
         if(r.ok)return r.json();
         return r.json().then(function(e){throw new Error((e.message||'unknown')+' (attempt '+(attempt+1)+')')});
       }).then(function(r){msg('✅ Done!');if(cb)cb();fetchD()}).catch(function(e){
-        if(attempt<2){setTimeout(function(){doSave(attempt+1)},500)}
-        else msg('❌ '+e.message,true)
+        if(attempt<5){setTimeout(function(){doSave(attempt+1)},1500)}
+        else msg('❌ Delete failed after 5 attempts',true)
       })
-    }).catch(function(e){if(attempt<2){setTimeout(function(){doSave(attempt+1)},500)}else msg('❌ SHA: '+e.message,true)})
+    }).catch(function(e){if(attempt<5){setTimeout(function(){doSave(attempt+1)},1500)}else msg('❌ SHA fetch failed: '+e.message,true)})
   }
   doSave(0)
 }

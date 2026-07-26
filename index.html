@@ -101,10 +101,14 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560}
 
 <!-- LIST -->
 <div id="tList" class="tc active">
-<div class="row" style="padding:0 0 10px 0"><input type="text" id="search" placeholder="🔍 Search..." onkeyup="render()" style="flex:1;margin:0"><button class="btn btn-blue btn-sm" onclick="fetchD()">🔄</button></div>
+<div class="row" style="padding:0 0 10px 0">
+  <input type="text" id="search" placeholder="🔍 Search..." onkeyup="render()" style="flex:1;margin:0">
+  <button class="btn btn-blue btn-sm" onclick="fetchD()">🔄</button>
+  <button class="btn btn-sm" style="background:#e94560;color:#fff" onclick="batchDeleteSkus()" id="batchDelBtn">🗑️ Delete Selected</button>
+</div>
 <div class="scroll">
 <table>
-<thead><tr><th style="width:15%">SKU / Link</th><th style="width:14%">Product</th><th style="width:6%">Phase</th><th style="width:9%">Current 🖼️</th><th style="width:9%">Next 🖼️</th><th style="width:9%">Next Time</th><th style="width:8%">Status</th><th style="width:6%"></th></tr></thead>
+<thead><tr><th style="width:3%"><input type="checkbox" id="selectAll" onchange="toggleAll()"></th><th style="width:15%">SKU / Link</th><th style="width:14%">Product</th><th style="width:6%">Phase</th><th style="width:9%">Current 🖼️</th><th style="width:9%">Next 🖼️</th><th style="width:9%">Next Time</th><th style="width:8%">Status</th><th style="width:6%"></th></tr></thead>
 <tbody id="tbList"></tbody></table></div></div>
 
 <!-- ADD -->
@@ -128,9 +132,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560}
 
 <!-- LOG -->
 <div id="tLog" class="tc">
+<div class="row" style="padding:0 0 10px 0">
+  <button class="btn btn-sm" style="background:#e94560;color:#fff" onclick="batchDeleteLog()">🗑️ Delete Selected</button>
+  <span style="color:#888;font-size:0.75rem">(checkbox ⬇ selects history entries)</span>
+</div>
 <div class="scroll">
 <table>
-<thead><tr><th>Time</th><th>SKU</th><th>Phase</th><th>Photo</th><th>Result</th></tr></thead>
+<thead><tr><th style="width:3%"><input type="checkbox" id="selectAllLog" onchange="toggleAllLog()"></th><th>Time</th><th>SKU</th><th>Phase</th><th>Photo</th><th>Result</th></tr></thead>
 <tbody id="tbLog"></tbody></table></div></div></div>
 
 <div class="footer"><span style="color:#e94560;font-weight:bold">🖼️ Bubble Photos v3.1</span><span style="color:#333;margin:0 8px">|</span><span style="color:#ffd700">Click photo to enlarge · HKTVmall link</span></div></div>
@@ -178,7 +186,7 @@ function nextUp(sk){
 }
 
 function render(){
-  var tb=document.getElementById('tbList');if(!C||!C.skus||Object.keys(C.skus).length===0){tb.innerHTML='<tr><td colspan="8" class="empty">No SKUs</td></tr>';return}
+  var tb=document.getElementById('tbList');if(!C||!C.skus||Object.keys(C.skus).length===0){tb.innerHTML='<tr><td colspan="10" class="empty">No SKUs</td></tr>';return}
   var q=(document.getElementById('search').value||'').toLowerCase(),h=''
   Object.keys(C.skus).forEach(function(k){
     var s=C.skus[k];if(q&&k.indexOf(q)===-1&&(s.product_name||'').indexOf(q)===-1)return
@@ -189,9 +197,9 @@ function render(){
       if(ph[i].photo_url){nextUrl=ph[i].photo_url;nextLbl=esc(ph[i].label||'Phase '+(i+1));nextIdx=i;if(ph[i].time){try{nextTime=new Date(ph[i].time).toLocaleString('zh-HK',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false})}catch(e){}}break}
     }
     var bc='badge '+s.status,bt=s.status==='active'?'🟢 Active':s.status==='completed'?'🔵 Done':s.status==='failed'?'❌ Fail':'⏳ Pending'
-    // Build HKTVmall link
     var skuLink='https://www.hktvmall.com/hktv/p/'+k
     h+='<tr>'
+    h+='<td><input type="checkbox" class="skuSel" data-sku="'+esc(k)+'"></td>'
     h+='<td><code style="font-size:0.7rem"><a class="sku-link" href="'+skuLink+'" target="_blank" title="Open in HKTVmall">'+esc(k)+' ↗</a></code></td>'
     h+='<td style="font-size:0.75rem">'+esc(s.product_name||'--')+'</td>'
     h+='<td style="font-size:0.7rem">'+(cur+1)+'/'+ph.length+'</td>'
@@ -199,10 +207,10 @@ function render(){
     h+='<td>'+imgHtml(nextUrl,50)+(nextUrl?'':'<div class="preview na">--</div>')+'</td>'
     h+='<td style="font-size:0.8rem;color:#e0e0e0;white-space:nowrap">'+nextTime+'<br><span style="color:#e0e0e0;font-size:0.7rem">'+nextLbl+'</span></td>'
     h+='<td><span class="'+bc+'">'+bt+'</span></td>'
-    h+='<td><button class="btn btn-sm btn-blue" onclick="editSku(\''+esc(k)+'\')">✎</button></td>'
+    h+='<td><div class="row" style="gap:4px"><button class="btn btn-sm btn-blue" style="padding:2px 6px" onclick="editSku(\''+esc(k)+'\')">✎</button><button class="btn btn-sm" style="background:#e94560;color:#fff;padding:2px 6px" onclick="deleteSku(\''+esc(k)+'\')">✕</button></div></td>'
     h+='</tr>'
   })
-  tb.innerHTML=h||'<tr><td colspan="8" class="empty">No matches</td></tr>'
+  tb.innerHTML=h||'<tr><td colspan="10" class="empty">No matches</td></tr>'
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
@@ -303,13 +311,84 @@ function editSku(sku){
 // ========== LOG ==========
 function renderLog(){
   var tb=document.getElementById('tbLog'),h=(D&&D.history)||[]
-  if(h.length===0){tb.innerHTML='<tr><td colspan="5" class="empty">No activity</td></tr>';return}
+  if(h.length===0){tb.innerHTML='<tr><td colspan="7" class="empty">No activity</td></tr>';return}
   var html=''
-  h.slice(-100).reverse().forEach(function(x){
+  h.slice(-100).reverse().forEach(function(x, idx){
     var bc='badge '+(x.status==='success'?'active':'failed'),bt=x.status==='success'?'✅ OK':'❌ Fail'
-    html+='<tr><td style="font-size:0.7rem;color:#888">'+(x.time||'--')+'</td><td><code style="color:#3498db;font-size:0.7rem">'+esc(x.sku)+'</code></td><td style="font-size:0.75rem">'+esc(x.label||x.action||'--')+'</td><td style="font-size:0.7rem;color:#888;word-break:break-all">'+esc(x.photo||'--')+'</td><td><span class="'+bc+'">'+bt+'</span></td></tr>'
+    html+='<tr>'
+    html+='<td><input type="checkbox" class="logSel" data-idx="'+idx+'"></td>'
+    html+='<td style="font-size:0.7rem;color:#888">'+(x.time||'--')+'</td>'
+    html+='<td><code style="color:#3498db;font-size:0.7rem">'+esc(x.sku)+'</code></td>'
+    html+='<td style="font-size:0.75rem">'+esc(x.label||x.action||'--')+'</td>'
+    html+='<td style="font-size:0.7rem;color:#888;word-break:break-all">'+esc(x.photo||'--')+'</td>'
+    html+='<td><span class="'+bc+'">'+bt+'</span></td>'
+    html+='<td><button class="btn btn-sm" style="background:#e94560;color:#fff;padding:2px 6px" onclick="deleteLog('+idx+')">✕</button></td>'
+    html+='</tr>'
   })
   tb.innerHTML=html
+}
+
+// ========== DELETE SKU ==========
+function deleteSku(sku){
+  if(!confirm('Delete SKU "'+sku+'"?'))return
+  var c=JSON.parse(JSON.stringify(C))
+  delete c.skus[sku]
+  save(c)
+}
+
+function batchDeleteSkus(){
+  var cbs=document.querySelectorAll('.skuSel:checked')
+  if(cbs.length===0){msg('Select SKUs to delete',true);return}
+  if(!confirm('Delete '+cbs.length+' SKU(s)?'))return
+  var c=JSON.parse(JSON.stringify(C))
+  cbs.forEach(function(cb){delete c.skus[cb.getAttribute('data-sku')]})
+  save(c)
+}
+
+function toggleAll(){
+  var checked=document.getElementById('selectAll').checked
+  document.querySelectorAll('.skuSel').forEach(function(cb){cb.checked=checked})
+}
+
+function toggleAllLog(){
+  var checked=document.getElementById('selectAllLog').checked
+  document.querySelectorAll('.logSel').forEach(function(cb){cb.checked=checked})
+}
+
+function deleteLog(idx){
+  if(!confirm('Delete this log entry?'))return
+  var d2=JSON.parse(JSON.stringify(D||{history:[]}))
+  var h=d2.history||[]
+  // idx is from reversed display, need to reverse-map
+  var realIdx=h.length-1-idx
+  h.splice(realIdx,1)
+  d2.history=h
+  saveData(d2)
+}
+
+function batchDeleteLog(){
+  var cbs=document.querySelectorAll('.logSel:checked')
+  if(cbs.length===0){msg('Select log entries',true);return}
+  if(!confirm('Delete '+cbs.length+' log entry(ies)?'))return
+  var d2=JSON.parse(JSON.stringify(D||{history:[]}))
+  var h=d2.history||[]
+  var idxes=[]
+  cbs.forEach(function(cb){idxes.push(parseInt(cb.getAttribute('data-idx')))})
+  // Reverse order so splice indices stay valid
+  idxes.sort(function(a,b){return b-a})
+  idxes.forEach(function(idx){
+    var realIdx=h.length-1-idx
+    h.splice(realIdx,1)
+  })
+  d2.history=h
+  saveData(d2)
+}
+
+function saveData(d,cb){
+  fetch('https://api.github.com/repos/'+R+'/contents/dashboard_data.json?ref='+B,{headers:{'Authorization':'token '+TK,'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.json()}).then(function(i){
+    var s=i.sha||''
+    fetch('https://api.github.com/repos/'+R+'/contents/dashboard_data.json',{method:'PUT',headers:{'Authorization':'token '+TK,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update dashboard data',content:btoa(unescape(encodeURIComponent(JSON.stringify(d,null,2)))),sha:s,branch:B})}).then(function(r){return r.json()}).then(function(r){if(r.content){msg('✅ Deleted!');if(cb)cb();fetchD()}else msg('❌ '+(r.message||'unknown'),true)}).catch(function(e){msg('❌ '+e.message,true)})
+  }).catch(function(e){msg('❌ SHA: '+e.message,true)})
 }
 
 // ========== TABS ==========

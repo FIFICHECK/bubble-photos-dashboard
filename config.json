@@ -2,12 +2,14 @@
   "skus": {
     "B0961005_S_4891609702053": {
       "product_name": "",
-      "start_time": "",
-      "start_photo_url": "https://lh3.googleusercontent.com/d/1pq1npK-AoPSD13EL5Beq5khXTRmdUuQu",
-      "end_time": "",
-      "end_photo_url": "",
-      "status": "pending",
-      "last_updated": ""
+      "phases": [
+        {"time": "", "photo_url": "https://lh3.googleusercontent.com/d/1pq1npK-AoPSD13EL5Beq5khXTRmdUuQu", "label": "🟢 波波圖"},
+        {"time": "", "photo_url": "", "label": "🟠 85折後波波圖"},
+        {"time": "", "photo_url": "", "label": "🟢 波波圖"},
+        {"time": "", "photo_url": "", "label": "🔵 原圖"}
+      ],
+      "current_phase": -1,
+      "status": "pending"
     }
   }
 }

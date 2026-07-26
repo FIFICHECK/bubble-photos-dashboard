@@ -1,0 +1,12 @@
+{
+  "skus": [
+    "B0961005_S_4891609702053"
+  ],
+  "sku_photo_urls": {
+    "B0961005_S_4891609702053": ""
+  },
+  "sku_periods": {},
+  "photo_update_cron": "0 6 * * *",
+  "last_updated": "",
+  "monitor_end": ""
+}

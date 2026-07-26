@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🖼️ Bubble Photos Update Dashboard</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { color-scheme: dark; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #1a1a2e; color: #e0e0e0; padding: 20px; min-height: 100vh;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+
+/* Header */
+.header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
+}
+.header h1 { font-size: 1.5rem; color: #e94560; }
+.header .subtitle { color: #888; font-size: 0.85rem; }
+
+/* Stats Cards */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.stat-card {
+  background: #16213e; border: 1px solid #0f3460; border-radius: 8px;
+  padding: 15px; text-align: center;
+}
+.stat-card h3 { font-size: 0.75rem; color: #888; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-card .value { font-size: 2rem; font-weight: bold; color: #e94560; }
+.stat-card .value.green { color: #2ecc71; }
+.stat-card .value.blue { color: #3498db; }
+.stat-card .value.yellow { color: #ffd700; }
+.stat-card .value.grey { color: #888; }
+
+/* Timer Cards */
+.timer-card .value { font-size: 1.8rem; font-family: monospace; }
+
+/* Sections */
+.section {
+  background: #16213e; border: 1px solid #0f3460; border-radius: 8px;
+  margin-bottom: 20px; overflow: hidden;
+}
+.section-title {
+  background: #0f3460; padding: 10px 15px;
+  font-size: 0.9rem; font-weight: bold; color: #e94560;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+/* Tables */
+.table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #0f3460; font-size: 0.8rem; }
+th { background: #1a1a2e; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+tr:hover { background: rgba(233,69,96,0.05); }
+
+/* Column widths */
+.sku-cell { width: 22%; }
+.name-cell { width: 20%; }
+.photo-cell { width: 10%; }
+.url-cell { width: 20%; }
+.status-cell { width: 10%; }
+.time-cell { width: 12%; }
+.action-cell { width: 6%; }
+
+/* Photo preview */
+.photo-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #0f3460; }
+.photo-preview.placeholder { display: flex; align-items: center; justify-content: center; background: #1a1a2e; color: #555; font-size: 0.6rem; }
+
+/* Status badges */
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 10px;
+  font-size: 0.7rem; font-weight: bold;
+}
+.badge.success { background: rgba(46,204,113,0.2); color: #2ecc71; border: 1px solid #2ecc71; }
+.badge.failed { background: rgba(233,69,96,0.2); color: #e94560; border: 1px solid #e94560; }
+.badge.pending { background: rgba(52,152,219,0.2); color: #3498db; border: 1px solid #3498db; }
+.badge.expired { background: rgba(136,136,136,0.2); color: #888; border: 1px solid #888; }
+
+/* Settings panel */
+.settings-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 15px; padding: 15px;
+}
+@media (max-width: 768px) { .settings-grid { grid-template-columns: 1fr; } }
+.settings-group { padding: 10px; background: #1a1a2e; border-radius: 6px; }
+.settings-group h4 { color: #ffd700; font-size: 0.85rem; margin-bottom: 10px; }
+.settings-group label { display: block; margin-bottom: 5px; color: #888; font-size: 0.75rem; }
+input, select, textarea {
+  background: #0f3460; border: 1px solid #1a3a6a; color: #e0e0e0;
+  padding: 8px 10px; border-radius: 4px; width: 100%; font-size: 0.8rem;
+  margin-bottom: 8px;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: #e94560; }
+.btn {
+  padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;
+  font-weight: bold; font-size: 0.8rem; transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.85; }
+.btn-primary { background: #e94560; color: #fff; }
+.btn-green { background: #2ecc71; color: #fff; }
+.btn-blue { background: #3498db; color: #fff; }
+.btn-small { padding: 4px 10px; font-size: 0.7rem; }
+
+/* Buttons row */
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+
+/* API message */
+.api-msg {
+  padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;
+  font-size: 0.8rem; display: none;
+}
+.api-msg.success { display: block; background: rgba(46,204,113,0.15); border: 1px solid #2ecc71; color: #2ecc71; }
+.api-msg.error { display: block; background: rgba(233,69,96,0.15); border: 1px solid #e94560; color: #e94560; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 40px; color: #555; font-size: 0.9rem; }
+
+/* Footer */
+.footer { text-align: center; padding: 20px; margin-top: 20px; border-top: 1px solid #0f3460; font-size: 0.75rem; color: #555; }
+
+/* Search input */
+.search-row { padding: 10px 15px; display: flex; gap: 10px; align-items: center; }
+.search-row input { margin-bottom: 0; flex: 1; }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .table-scroll table { table-layout: auto; }
+  .table-scroll th, .table-scroll td { white-space: nowrap; }
+  .table-scroll td.name-cell { white-space: normal; min-width: 250px; }
+  .table-scroll td.sku-cell { min-width: 180px; }
+  body { padding: 10px; }
+  .stats-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Modal */
+.modal-overlay {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-content {
+  background: #16213e; border: 1px solid #0f3460; border-radius: 8px;
+  padding: 20px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;
+}
+.modal-content h2 { color: #e94560; margin-bottom: 15px; }
+.modal-content .close-btn { float: right; cursor: pointer; color: #888; font-size: 1.2rem; }
+.modal-content .close-btn:hover { color: #e94560; }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; border-bottom: 1px solid #0f3460; }
+.tab { padding: 10px 20px; cursor: pointer; color: #888; border-bottom: 2px solid transparent; font-size: 0.85rem; }
+.tab.active { color: #e94560; border-bottom-color: #e94560; }
+.tab-content { display: none; padding: 15px; }
+.tab-content.active { display: block; }
+
+/* History table */
+.history-table { width: 100%; }
+.history-table th { font-size: 0.7rem; }
+.history-table td { font-size: 0.75rem; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>🖼️ Bubble Photos Update Dashboard</h1>
+      <div class="subtitle">Auto-update MMS product photos from public URLs</div>
+    </div>
+    <div id="monitoringPeriod" style="color:#ffd700;font-size:0.8rem;">⏱️ Next update: --</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card"><h3>📦 Total SKUs</h3><div class="value blue" id="totalSku">0</div></div>
+    <div class="stat-card"><h3>✅ Updated Today</h3><div class="value green" id="updatedToday">0</div></div>
+    <div class="stat-card"><h3>⏳ Pending</h3><div class="value yellow" id="pendingCount">0</div></div>
+    <div class="stat-card"><h3>❌ Failed</h3><div class="value" id="failedCount">0</div></div>
+    <div class="stat-card timer-card"><h3>⏱️ Next Cron</h3><div class="value" id="nextCronTimer" style="font-size:1.8rem;color:#3498db;font-family:monospace">--</div></div>
+    <div class="stat-card timer-card"><h3>🔄 Page Refresh</h3><div class="value" id="pageRefreshTimer" style="font-size:1.8rem;color:#2ecc71;font-family:monospace">00:30</div></div>
+  </div>
+
+  <!-- API Message -->
+  <div id="apiMsg" class="api-msg"></div>
+
+  <!-- Tabs -->
+  <div class="section">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('skus')">📋 SKU Photos</div>
+      <div class="tab" onclick="switchTab('settings')">⚙️ Settings</div>
+      <div class="tab" onclick="switchTab('history')">📝 Update Log</div>
+    </div>
+
+    <!-- Tab: SKU Photos -->
+    <div id="tabSkus" class="tab-content active">
+      <div class="search-row">
+        <input type="text" id="skuSearch" placeholder="🔍 Search SKU, name, or URL..." onkeyup="filterSkus()">
+        <button class="btn btn-blue btn-small" onclick="refreshData()">🔄 Refresh</button>
+      </div>
+      <div class="table-scroll" id="skuTableContainer">
+        <table>
+          <thead>
+            <tr>
+              <th class="sku-cell">SKU</th>
+              <th class="name-cell">Product Name</th>
+              <th class="photo-cell">Photo</th>
+              <th class="url-cell">Photo URL</th>
+              <th class="status-cell">Status</th>
+              <th class="time-cell">Last Updated</th>
+              <th class="action-cell">Action</th>
+            </tr>
+          </thead>
+          <tbody id="skuTableBody">
+            <tr><td colspan="7" class="empty-state">No data yet. Add SKUs in Settings.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab: Settings -->
+    <div id="tabSettings" class="tab-content">
+      <div class="settings-grid">
+        <div class="settings-group">
+          <h4>➕ Add Single SKU</h4>
+          <label>SKU ID (e.g. B0961005_S_XXXXXXXXX)</label>
+          <input type="text" id="addSkuInput" placeholder="e.g. B0961005_S_4891609702053">
+          <label>🖼️ Photo URL (public link)</label>
+          <input type="text" id="addPhotoUrlInput" placeholder="https://lh3.googleusercontent.com/d/...">
+          <label>🔴 End Date (optional)</label>
+          <input type="date" id="addSkuEnd">
+          <button class="btn btn-primary" onclick="addSingleSku()">➕ Add</button>
+        </div>
+
+        <div class="settings-group">
+          <h4>📋 Bulk Add</h4>
+          <label>One SKU per line: <code>SKU_ID | PHOTO_URL</code></label>
+          <textarea id="bulkSkus" rows="4" placeholder="B0961005_S_4891609702053 | https://..."></textarea>
+          <button class="btn btn-primary" onclick="bulkAddSkus()">📋 Bulk Add</button>
+        </div>
+
+        <div class="settings-group" style="grid-column: 1 / -1;">
+          <h4>⏱️ Schedule Settings</h4>
+          <label>Cron Schedule (daily)</label>
+          <select id="cronSchedule">
+            <option value="0 6 * * *">🌅 06:00 Daily</option>
+            <option value="0 9 * * *">☀️ 09:00 Daily</option>
+            <option value="0 12 * * *">🌤️ 12:00 Daily</option>
+            <option value="0 15 * * *">🌆 15:00 Daily</option>
+            <option value="0 18 * * *">🌇 18:00 Daily</option>
+            <option value="0 */6 * * *">🔄 Every 6 hours</option>
+          </select>
+          <button class="btn btn-green" onclick="saveSchedule()">💾 Save Schedule</button>
+        </div>
+      </div>
+
+      <div style="padding: 0 15px 15px;">
+        <h4 style="color:#ffd700;margin-bottom:8px;">📋 Current SKUs</h4>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:5%;"><input type="checkbox" onchange="toggleSelectAll(this)"></th>
+                <th style="width:30%;">SKU</th>
+                <th style="width:40%;">Photo URL</th>
+                <th style="width:15%;">End Date</th>
+                <th style="width:10%;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="skuSettingsBody"></tbody>
+          </table>
+        </div>
+        <button class="btn btn-small" style="background:#e94560;color:#fff;margin-top:8px;" onclick="deleteSelected()">🗑️ Delete Selected</button>
+        <button class="btn btn-green" onclick="saveAndRun()" style="margin-left:8px;">🚀 Save &amp; Run Now</button>
+      </div>
+    </div>
+
+    <!-- Tab: History -->
+    <div id="tabHistory" class="tab-content">
+      <div class="table-scroll">
+        <table class="history-table">
+          <thead>
+            <tr><th>Time</th><th>SKU</th><th>Product</th><th>Status</th><th>Message</th></tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr><td colspan="5" class="empty-state">No update history yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="version-badge">
+      <span style="color:#e94560;font-weight:bold;">🖼️ Bubble Photos v1.0</span>
+      <span style="color:#333;margin:0 8px;">|</span>
+      <span style="color:#ffd700;">🔄 30s refresh</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ======================== CONFIG ========================
+var CONFIG_REPO = 'FIFICHECK/bubble-photos-dashboard';
+var CONFIG_BRANCH = 'master';
+var CONFIG_URL = 'https://raw.githubusercontent.com/' + CONFIG_REPO + '/' + CONFIG_BRANCH + '/config.json';
+var DATA_URL = 'https://raw.githubusercontent.com/' + CONFIG_REPO + '/' + CONFIG_BRANCH + '/dashboard_data.json';
+var GIT_TOKEN_KEY = 'bubble_photos_token';
+var GIT_TOKEN = localStorage.getItem(GIT_TOKEN_KEY) || '';
+
+var config = null;
+var data = null;
+var refreshInterval = null;
+var pageRefreshSeconds = 30;
+
+// ======================== INIT ========================
+function init() {
+  fetchData();
+  refreshInterval = setInterval(function() {
+    pageRefreshSeconds--;
+    if (pageRefreshSeconds <= 0) { pageRefreshSeconds = 30; fetchData(); }
+    document.getElementById('pageRefreshTimer').textContent = String(pageRefreshSeconds).padStart(2,'0') + 's';
+  }, 1000);
+  // Cron countdown
+  setInterval(updateCronTimer, 1000);
+}
+init();
+
+function fetchData() {
+  Promise.all([
+    fetch(CONFIG_URL).then(function(r) { if (!r.ok) throw new Error('Config fetch failed'); return r.json(); }),
+    fetch(DATA_URL).then(function(r) { if (!r.ok) throw new Error('Data fetch failed'); return r.json(); })
+  ]).then(function(results) {
+    config = results[0];
+    data = results[1];
+    updateDashboard();
+    pageRefreshSeconds = 30;
+  }).catch(function(e) {
+    console.log('Fetch error:', e.message);
+  });
+}
+
+function refreshData() { fetchData(); }
+
+// ======================== DASHBOARD UPDATE ========================
+function updateDashboard() {
+  if (!config || !data) return;
+  var skus = config.skus || [];
+  var photoUrls = config.sku_photo_urls || {};
+  var periods = config.sku_periods || {};
+
+  // Stats
+  var totalSku = skus.length;
+  var updatedToday = (data.updated_skus || []).length;
+  var failedCount = (data.failed_skus || []).length;
+  var pendingCount = 0;
+  // Count pending (have photo URL but never updated)
+  skus.forEach(function(sku) {
+    if (photoUrls[sku]) {
+      var found = false;
+      (data.updated_skus || []).forEach(function(u) { if (u.sku === sku) found = true; });
+      if (!found && (data.pending_skus || []).indexOf(sku) === -1) {
+        pendingCount++;
+      }
+    }
+  });
+  pendingCount += (data.pending_skus || []).length;
+
+  document.getElementById('totalSku').textContent = totalSku;
+  document.getElementById('updatedToday').textContent = updatedToday;
+  document.getElementById('pendingCount').textContent = pendingCount;
+  document.getElementById('failedCount').textContent = failedCount;
+
+  // SKU Table
+  renderSkuTable(skus, photoUrls, periods);
+  // Settings Table
+  renderSkuSettings(skus, photoUrls, periods);
+  // History
+  renderHistory();
+  // Monitoring period
+  updateMonitoringPeriod();
+  // Cron schedule
+  if (config.photo_update_cron) {
+    var sel = document.getElementById('cronSchedule');
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === config.photo_update_cron) { sel.selectedIndex = i; break; }
+    }
+  }
+}
+
+// ======================== SKU TABLE ========================
+function renderSkuTable(skus, photoUrls, periods) {
+  var tbody = document.getElementById('skuTableBody');
+  if (!skus || skus.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No SKUs yet. Add them in Settings.</td></tr>';
+    return;
+  }
+  var search = (document.getElementById('skuSearch').value || '').toLowerCase();
+  var html = '';
+  var now = new Date();
+  skus.forEach(function(sku) {
+    var url = photoUrls[sku] || '';
+    var name = '';
+    var status = 'pending';
+    var updatedTime = '';
+    var failed = false;
+
+    // Check status from data
+    (data.updated_skus || []).forEach(function(u) {
+      if (u.sku === sku) { status = 'success'; updatedTime = u.updated_at; name = u.product_name || name; }
+    });
+    (data.failed_skus || []).forEach(function(u) {
+      if (u.sku === sku) { failed = true; status = 'failed'; name = u.product_name || name; }
+    });
+    // Check if expired
+    var endDate = periods[sku] || config.monitor_end || '';
+    if (endDate && new Date(endDate) < now && status === 'pending') { status = 'expired'; }
+
+    // Search filter
+    if (search && sku.toLowerCase().indexOf(search) === -1 && url.toLowerCase().indexOf(search) === -1 && name.toLowerCase().indexOf(search) === -1) return;
+
+    var badgeClass = 'badge ' + status;
+    var badgeText = status === 'success' ? '✅ Updated' : status === 'failed' ? '❌ Failed' : status === 'expired' ? '⏰ Expired' : '⏳ Pending';
+
+    html += '<tr>';
+    html += '<td class="sku-cell"><code style="color:#3498db;font-size:0.75rem;">' + escapeHtml(sku) + '</code></td>';
+    html += '<td class="name-cell" style="font-size:0.75rem;">' + escapeHtml(name || '--') + '</td>';
+    html += '<td class="photo-cell">';
+    if (url) {
+      html += '<img class="photo-preview" src="' + escapeHtml(url) + '" onerror="this.style.display=\'none\'" alt="photo">';
+    } else {
+      html += '<div class="photo-preview placeholder">No URL</div>';
+    }
+    html += '</td>';
+    html += '<td class="url-cell" style="font-size:0.7rem;color:#888;word-break:break-all;">' + (url ? escapeHtml(url.substring(0, 60)) + (url.length > 60 ? '...' : '') : '--') + '</td>';
+    html += '<td class="status-cell"><span class="' + badgeClass + '">' + badgeText + '</span></td>';
+    html += '<td class="time-cell" style="font-size:0.7rem;color:#888;">' + (updatedTime || '--') + '</td>';
+    html += '<td class="action-cell"><button class="btn btn-small btn-primary" onclick="updateSingleSku(\'' + escapeHtml(sku) + '\')">🔄</button></td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html || '<tr><td colspan="7" class="empty-state">No matching SKUs.</td></tr>';
+}
+
+function filterSkus() { renderSkuTable(config ? config.skus : [], config ? config.sku_photo_urls || {} : {}, config ? config.sku_periods || {} : {}); }
+
+// ======================== SETTINGS TABLE ========================
+function renderSkuSettings(skus, photoUrls, periods) {
+  var tbody = document.getElementById('skuSettingsBody');
+  if (!skus || skus.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No SKUs added yet.</td></tr>';
+    return;
+  }
+  var html = '';
+  skus.forEach(function(sku) {
+    html += '<tr>';
+    html += '<td><input type="checkbox" class="sku-del-cb" value="' + escapeHtml(sku) + '"></td>';
+    html += '<td><code style="color:#3498db;">' + escapeHtml(sku) + '</code></td>';
+    html += '<td><input type="text" class="photo-url-input" data-sku="' + escapeHtml(sku) + '" value="' + escapeHtml(photoUrls[sku] || '') + '" placeholder="Optional photo URL"></td>';
+    html += '<td style="color:#888;font-size:0.75rem;">' + (periods[sku] ? periods[sku] : '--') + '</td>';
+    html += '<td><button class="btn btn-small" style="background:#e94560;color:#fff;" onclick="removeSku(\'' + escapeHtml(sku) + '\')">✕</button></td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+// ======================== ADD/REMOVE SKUS ========================
+function getGitToken() {
+  var token = localStorage.getItem(GIT_TOKEN_KEY);
+  if (!token) {
+    token = prompt('🔑 Enter GitHub token (repo scope):');
+    if (token) localStorage.setItem(GIT_TOKEN_KEY, token);
+  }
+  return token;
+}
+
+function showApiMsg(msg, isError) {
+  var el = document.getElementById('apiMsg');
+  el.textContent = msg;
+  el.className = 'api-msg ' + (isError ? 'error' : 'success');
+  el.style.display = 'block';
+  setTimeout(function() { el.style.display = 'none'; }, 5000);
+}
+
+function saveConfigToGithub(updatedConfig, callback) {
+  var token = getGitToken();
+  if (!token) { showApiMsg('❌ GitHub token required', true); return; }
+  // First get the current file SHA
+  fetch('https://api.github.com/repos/' + CONFIG_REPO + '/contents/config.json', {
+    headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+  }).then(function(r) { return r.json(); }).then(function(info) {
+    var sha = info.sha || '';
+    var content = btoa(unescape(encodeURIComponent(JSON.stringify(updatedConfig, null, 2))));
+    fetch('https://api.github.com/repos/' + CONFIG_REPO + '/contents/config.json', {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+      body: JSON.stringify({
+        message: 'Update config.json via dashboard',
+        content: content,
+        sha: sha,
+        branch: CONFIG_BRANCH
+      })
+    }).then(function(r) { return r.json(); }).then(function(result) {
+      if (result.content) {
+        showApiMsg('✅ Config saved!');
+        if (callback) callback();
+        fetchData();
+      } else {
+        showApiMsg('❌ Save failed: ' + (result.message || 'unknown'), true);
+      }
+    }).catch(function(e) { showApiMsg('❌ Error: ' + e.message, true); });
+  }).catch(function(e) { showApiMsg('❌ Error fetching SHA: ' + e.message, true); });
+}
+
+function addSingleSku() {
+  var sku = document.getElementById('addSkuInput').value.trim();
+  var url = document.getElementById('addPhotoUrlInput').value.trim();
+  var endDate = document.getElementById('addSkuEnd').value;
+  if (!sku) { showApiMsg('❌ Please enter SKU ID', true); return; }
+  var c = JSON.parse(JSON.stringify(config));
+  if (c.skus.indexOf(sku) === -1) c.skus.push(sku);
+  if (url) { c.sku_photo_urls = c.sku_photo_urls || {}; c.sku_photo_urls[sku] = url; }
+  if (endDate) { c.sku_periods = c.sku_periods || {}; c.sku_periods[sku] = endDate + 'T23:59:59'; }
+  saveConfigToGithub(c, function() {
+    document.getElementById('addSkuInput').value = '';
+    document.getElementById('addPhotoUrlInput').value = '';
+    document.getElementById('addSkuEnd').value = '';
+  });
+}
+
+function bulkAddSkus() {
+  var text = document.getElementById('bulkSkus').value.trim();
+  if (!text) { showApiMsg('❌ Please enter SKUs', true); return; }
+  var lines = text.split('\n');
+  var c = JSON.parse(JSON.stringify(config));
+  c.sku_photo_urls = c.sku_photo_urls || {};
+  lines.forEach(function(line) {
+    line = line.trim();
+    if (!line) return;
+    var parts = line.split('|');
+    var sku = parts[0].trim();
+    var url = parts[1] ? parts[1].trim() : '';
+    if (sku && c.skus.indexOf(sku) === -1) c.skus.push(sku);
+    if (sku && url) c.sku_photo_urls[sku] = url;
+  });
+  saveConfigToGithub(c, function() {
+    document.getElementById('bulkSkus').value = '';
+  });
+}
+
+function removeSku(sku) {
+  if (!confirm('Remove ' + sku + '?')) return;
+  var c = JSON.parse(JSON.stringify(config));
+  c.skus = c.skus.filter(function(s) { return s !== sku; });
+  if (c.sku_photo_urls) delete c.sku_photo_urls[sku];
+  if (c.sku_periods) delete c.sku_periods[sku];
+  saveConfigToGithub(c);
+}
+
+function toggleSelectAll(master) {
+  var cbs = document.querySelectorAll('.sku-del-cb');
+  cbs.forEach(function(cb) { cb.checked = master.checked; });
+}
+
+function deleteSelected() {
+  var cbs = document.querySelectorAll('.sku-del-cb:checked');
+  if (cbs.length === 0) { showApiMsg('❌ No SKUs selected', true); return; }
+  if (!confirm('Delete ' + cbs.length + ' SKU(s)?')) return;
+  var toDelete = {};
+  cbs.forEach(function(cb) { toDelete[cb.value] = true; });
+  var c = JSON.parse(JSON.stringify(config));
+  c.skus = c.skus.filter(function(s) { return !toDelete[s]; });
+  Object.keys(toDelete).forEach(function(sku) {
+    if (c.sku_photo_urls) delete c.sku_photo_urls[sku];
+    if (c.sku_periods) delete c.sku_periods[sku];
+  });
+  saveConfigToGithub(c);
+}
+
+function saveSchedule() {
+  var cron = document.getElementById('cronSchedule').value;
+  var c = JSON.parse(JSON.stringify(config));
+  c.photo_update_cron = cron;
+  saveConfigToGithub(c);
+}
+
+// ======================== SAVE PHOTO URLS FROM SETTINGS ========================
+function savePhotoUrls() {
+  var inputs = document.querySelectorAll('.photo-url-input');
+  var c = JSON.parse(JSON.stringify(config));
+  c.sku_photo_urls = c.sku_photo_urls || {};
+  inputs.forEach(function(inp) {
+    var sku = inp.getAttribute('data-sku');
+    var url = inp.value.trim();
+    if (url) { c.sku_photo_urls[sku] = url; }
+    else { delete c.sku_photo_urls[sku]; }
+  });
+  saveConfigToGithub(c);
+}
+
+// ======================== TRIGGER CHECK ========================
+function saveAndRun() {
+  // Save photo URLs first
+  var inputs = document.querySelectorAll('.photo-url-input');
+  var c = JSON.parse(JSON.stringify(config));
+  c.sku_photo_urls = c.sku_photo_urls || {};
+  inputs.forEach(function(inp) {
+    var sku = inp.getAttribute('data-sku');
+    var url = inp.value.trim();
+    if (url) { c.sku_photo_urls[sku] = url; }
+    else { delete c.sku_photo_urls[sku]; }
+  });
+  saveConfigToGithub(c, function() {
+    // Trigger workflow
+    triggerWorkflow();
+  });
+}
+
+function triggerWorkflow() {
+  var token = getGitToken();
+  if (!token) { showApiMsg('❌ Token required', true); return; }
+  fetch('https://api.github.com/repos/' + CONFIG_REPO + '/actions/workflows/photo-update.yml/dispatches', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'token ' + token,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ ref: CONFIG_BRANCH, inputs: {} })
+  }).then(function(r) {
+    if (r.ok) {
+      showApiMsg('🚀 Photo update triggered! Data will update in ~2-3 min');
+    } else {
+      showApiMsg('⚠️ Trigger failed: HTTP ' + r.status, true);
+    }
+  }).catch(function(e) {
+    showApiMsg('⚠️ Trigger failed: ' + e.message, true);
+  });
+}
+
+// ======================== UPDATE SINGLE SKU ========================
+function updateSingleSku(sku) {
+  showApiMsg('🔄 Triggering update for ' + sku + '...');
+  triggerWorkflow();
+}
+
+// ======================== HISTORY ========================
+function renderHistory() {
+  var tbody = document.getElementById('historyBody');
+  var history = data ? data.history || [] : [];
+  if (history.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No update history yet.</td></tr>';
+    return;
+  }
+  var html = '';
+  history.slice(-50).reverse().forEach(function(h) {
+    var badgeClass = h.status === 'success' ? 'badge success' : 'badge failed';
+    var badgeText = h.status === 'success' ? '✅ Success' : '❌ Failed';
+    html += '<tr>';
+    html += '<td style="font-size:0.7rem;color:#888;">' + (h.checked_at || h.updated_at || '--') + '</td>';
+    html += '<td><code style="color:#3498db;font-size:0.7rem;">' + escapeHtml(h.sku) + '</code></td>';
+    html += '<td style="font-size:0.75rem;">' + escapeHtml(h.product_name || '--') + '</td>';
+    html += '<td><span class="' + badgeClass + '">' + badgeText + '</span></td>';
+    html += '<td style="font-size:0.7rem;color:#888;">' + escapeHtml(h.message || '') + '</td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+// ======================== CRON TIMER ========================
+function updateCronTimer() {
+  var cron = config ? config.photo_update_cron : '';
+  if (!cron) { document.getElementById('nextCronTimer').textContent = '--'; return; }
+  var parts = cron.split(' ');
+  if (parts.length < 5) { document.getElementById('nextCronTimer').textContent = '--'; return; }
+  var minute = parseInt(parts[0]);
+  var hour = parseInt(parts[1]);
+  var now = new Date();
+  var next = new Date(now);
+  next.setHours(hour, minute, 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
+  var diff = Math.floor((next - now) / 1000);
+  var h = Math.floor(diff / 3600);
+  var m = Math.floor((diff % 3600) / 60);
+  var s = diff % 60;
+  document.getElementById('nextCronTimer').textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+function updateMonitoringPeriod() {
+  var cron = config ? config.photo_update_cron : '';
+  if (!cron) { document.getElementById('monitoringPeriod').textContent = '⏱️ No schedule set'; return; }
+  var labels = {
+    '0 6 * * *': '🌅 06:00 Daily',
+    '0 9 * * *': '☀️ 09:00 Daily',
+    '0 12 * * *': '🌤️ 12:00 Daily',
+    '0 15 * * *': '🌆 15:00 Daily',
+    '0 18 * * *': '🌇 18:00 Daily',
+    '0 */6 * * *': '🔄 Every 6 hours'
+  };
+  document.getElementById('monitoringPeriod').textContent = '⏱️ Schedule: ' + (labels[cron] || cron);
+}
+
+// ======================== TABS ========================
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelector('.tab[onclick*="' + name + '"]').classList.add('active');
+  document.getElementById('tab' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+  if (name === 'settings') renderSkuSettings(config ? config.skus : [], config ? config.sku_photo_urls || {} : {}, config ? config.sku_periods || {} : {});
+}
+
+// ======================== HELPERS ========================
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

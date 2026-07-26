@@ -619,9 +619,11 @@ function saveAndRun() {
     if (url) { c.sku_photo_urls[sku] = url; }
     else { delete c.sku_photo_urls[sku]; }
   });
+  // Set run_now flag for cron to pick up
+  c.run_now = true;
+  c.run_now_time = new Date().toISOString();
   saveConfigToGithub(c, function() {
-    // Trigger workflow
-    triggerWorkflow();
+    showApiMsg('🚀 Save complete! Cron will pick up within 5 min.');
   });
 }
 

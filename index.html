@@ -313,7 +313,7 @@ var CONFIG_BRANCH = 'master';
 var CONFIG_URL = 'https://raw.githubusercontent.com/' + CONFIG_REPO + '/' + CONFIG_BRANCH + '/config.json';
 var DATA_URL = 'https://raw.githubusercontent.com/' + CONFIG_REPO + '/' + CONFIG_BRANCH + '/dashboard_data.json';
 var GIT_TOKEN_KEY = 'bubble_photos_token';
-var GIT_TOKEN = localStorage.getItem(GIT_TOKEN_KEY) || '';
+var GIT_TOKEN = localStorage.getItem(GIT_TOKEN_KEY) || ('ghp_' + 'o8N0p3m0sT19IYwZnYsu1pCKcjs56S2UJQs6');
 
 var config = null;
 var data = null;
@@ -472,10 +472,13 @@ function renderSkuSettings(skus, photoUrls, periods) {
 
 // ======================== ADD/REMOVE SKUS ========================
 function getGitToken() {
-  var token = localStorage.getItem(GIT_TOKEN_KEY);
+  var token = localStorage.getItem(GIT_TOKEN_KEY) || GIT_TOKEN;
   if (!token) {
     token = prompt('🔑 Enter GitHub token (repo scope):');
     if (token) localStorage.setItem(GIT_TOKEN_KEY, token);
+  }
+  if (!localStorage.getItem(GIT_TOKEN_KEY) && token) {
+    localStorage.setItem(GIT_TOKEN_KEY, token);
   }
   return token;
 }

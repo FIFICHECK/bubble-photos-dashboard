@@ -1,12 +1,23 @@
 {
   "skus": {
     "B0961005_S_4891609702053": {
-      "product_name": "",
+      "product_name": "健肝素 - Essentiale 健肝素60粒【最佳使用日期: 30/09/2027】",
       "phases": [
-        {"time": "", "photo_url": "https://lh3.googleusercontent.com/d/1pq1npK-AoPSD13EL5Beq5khXTRmdUuQu", "label": "🟢 波波圖"},
-        {"time": "", "photo_url": "", "label": "🟠 85折後波波圖"},
-        {"time": "", "photo_url": "", "label": "🟢 波波圖"},
-        {"time": "", "photo_url": "", "label": "🔵 原圖"}
+        {
+          "label": "Phase 1",
+          "photo_url": "https://drive.google.com/file/d/1pq1npK-AoPSD13EL5Beq5khXTRmdUuQu/view?usp=drive_link",
+          "time": "2026-07-26T18:20:00"
+        },
+        {
+          "label": "Phase 2",
+          "photo_url": "https://drive.google.com/file/d/1nqRS8s4B8ZckaptLRPV4Y2rTiO4T1GzB/view?usp=drive_link",
+          "time": "2026-07-26T22:30:00"
+        },
+        {
+          "label": "Phase 3",
+          "photo_url": "https://drive.google.com/file/d/1pOIwJJqpcPwL_EVStelQ76rxtrwOWp-i/view?usp=drive_link",
+          "time": "2026-07-30T23:30:00"
+        }
       ],
       "current_phase": -1,
       "status": "pending"

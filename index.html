@@ -31,7 +31,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .tc{display:none;padding:15px}
 .tc.active{display:block}
 .scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:6px}
-table{width:100%;border-collapse:separate;border-spacing:0;min-width:900px}
+table{width:100%;border-collapse:separate;border-spacing:0}
 th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #0f3460;font-size:0.8rem;vertical-align:middle}
 th{background:#1a1a2e;color:#aaa;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;font-size:0.7rem;position:sticky;top:0;z-index:1}
 tr:last-child td{border-bottom:none}
@@ -41,9 +41,9 @@ tr:hover td{background:rgba(233,69,96,0.04)}
 .badge.completed{background:rgba(52,152,219,0.15);color:#3498db;border:1px solid rgba(52,152,219,0.3)}
 .badge.pending{background:rgba(255,215,0,0.15);color:#ffd700;border:1px solid rgba(255,215,0,0.3)}
 .badge.failed{background:rgba(233,69,96,0.15);color:#e94560;border:1px solid rgba(233,69,96,0.3)}
-.preview{width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #0f3460;cursor:pointer;transition:all .2s;display:block}
-.preview:hover{transform:scale(1.15);border-color:#e94560;box-shadow:0 0 12px rgba(233,69,96,0.3)}
-.preview.na{display:flex;align-items:center;justify-content:center;width:48px;height:48px;background:#1a1a2e;color:#444;font-size:0.6rem;border-radius:6px;border:1px dashed #0f3460;cursor:default}
+.preview{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid #0f3460;cursor:pointer;transition:all .2s;display:block}
+.preview:hover{transform:scale(1.12);border-color:#e94560;box-shadow:0 0 14px rgba(233,69,96,0.3)}
+.preview.na{display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#1a1a2e;color:#444;font-size:0.6rem;border-radius:8px;border:1px dashed #0f3460;cursor:default}
 input,select,textarea{background:#0f3460;border:1px solid #1a3a6a;color:#e0e0e0;padding:8px 12px;border-radius:6px;width:100%;font-size:0.8rem;margin-bottom:8px;transition:border-color .2s}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560;box-shadow:0 0 0 2px rgba(233,69,96,0.15)}
 .btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:0.8rem;transition:all .2s;margin:2px}
@@ -201,15 +201,15 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560;box-sh
 <div class="scroll">
 <table>
 <thead><tr>
-  <th style="width:32px;text-align:center"><input type="checkbox" id="selectAll" onchange="toggleAll()"></th>
-  <th style="min-width:160px">SKU / Link</th>
-  <th style="min-width:140px">Product</th>
-  <th style="width:50px;text-align:center">Phase</th>
-  <th style="width:80px;text-align:center">Current 🖼️</th>
-  <th style="width:80px;text-align:center">Next 🖼️</th>
-  <th style="min-width:100px">Next Time</th>
-  <th style="width:85px">Status</th>
-  <th style="width:75px;text-align:center">Action</th>
+  <th style="width:30px;text-align:center"><input type="checkbox" id="selectAll" onchange="toggleAll()"></th>
+  <th style="width:22%">SKU / Link</th>
+  <th style="width:20%">Product</th>
+  <th style="width:6%;text-align:center">Phase</th>
+  <th style="width:10%;text-align:center">Current 🖼️</th>
+  <th style="width:10%;text-align:center">Next 🖼️</th>
+  <th style="width:13%">Next Time</th>
+  <th style="width:9%">Status</th>
+  <th style="width:10%;text-align:center">Action</th>
 </tr></thead>
 <tbody id="tbList"></tbody></table></div></div>
 
@@ -244,13 +244,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560;box-sh
 <div class="scroll">
 <table>
 <thead><tr>
-  <th style="width:32px;text-align:center"><input type="checkbox" id="selectAllLog" onchange="toggleAllLog()"></th>
-  <th style="min-width:130px">Time</th>
-  <th style="min-width:160px">SKU</th>
-  <th style="min-width:100px">Phase</th>
-  <th>Photo</th>
-  <th style="width:70px;text-align:center">Result</th>
-  <th style="width:45px;text-align:center">Del</th>
+  <th style="width:30px;text-align:center"><input type="checkbox" id="selectAllLog" onchange="toggleAllLog()"></th>
+  <th style="width:22%">Time</th>
+  <th style="width:22%">SKU</th>
+  <th style="width:18%">Phase</th>
+  <th style="width:23%">Photo</th>
+  <th style="width:9%;text-align:center">Result</th>
+  <th style="width:6%;text-align:center">Del</th>
 </tr></thead>
 <tbody id="tbLog"></tbody></table></div></div></div>
 
@@ -309,7 +309,7 @@ function closeHelp(){document.getElementById('helpModal').classList.remove('acti
 
 function imgHtml(url,size){
   if(!url)return '<div class="preview na">--</div>'
-  var s=size||48
+  var s=size||56
   return '<img class="preview" src="'+esc(url)+'" style="width:'+s+'px;height:'+s+'px" onclick="openImg(\''+esc(url)+'\')" onerror="this.style.display=\'none\'" title="Click to enlarge">'
 }
 
@@ -381,7 +381,7 @@ function renderPhases(phases){
     var p=phases[i]
     h+='<div class="phase-row">'
     h+='<div><label>Phase '+(i+1)+'</label><input class="phLbl" data-i="'+i+'" value="'+esc(p.label||'')+'" placeholder="e.g. 🟢 波波圖"></div>'
-    h+='<div><label>Photo URL '+imgHtml(p.photo_url||'',48)+'</label><input class="phUrl" data-i="'+i+'" value="'+esc(p.photo_url||'')+'" placeholder="https://lh3.googleusercontent.com/d/..."></div>'
+    h+='<div><label>Photo URL '+imgHtml(p.photo_url||'',56)+'</label><input class="phUrl" data-i="'+i+'" value="'+esc(p.photo_url||'')+'" placeholder="https://lh3.googleusercontent.com/d/..."></div>'
     h+='<div><label>Date / Time</label><input class="phTime" data-i="'+i+'" type="datetime-local" value="'+(p.time?p.time.slice(0,16):'')+'"></div>'
     h+='<div style="display:flex;gap:4px;align-items:end;padding-bottom:4px">'
     h+='<button class="btn btn-sm" style="background:#e94560;color:#fff;padding:4px 10px" onclick="removePhase('+i+')">✕</button>'

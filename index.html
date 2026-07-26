@@ -8,7 +8,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html{color-scheme:dark}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;color:#e0e0e0;padding:20px}
-.container{max-width:1400px;margin:0 auto}
+.container{max-width:1500px;margin:0 auto}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
 .header h1{font-size:1.5rem;color:#e94560}
 .header .sub{color:#888;font-size:0.85rem}
@@ -36,8 +36,11 @@ tr:hover{background:rgba(233,69,96,0.05)}
 .badge.completed{background:rgba(52,152,219,0.2);color:#3498db;border:1px solid #3498db}
 .badge.pending{background:rgba(255,215,0,0.2);color:#ffd700;border:1px solid #ffd700}
 .badge.failed{background:rgba(233,69,96,0.2);color:#e94560;border:1px solid #e94560}
-.preview{width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid #0f3460}
-.preview.na{display:flex;align-items:center;justify-content:center;background:#1a1a2e;color:#555;font-size:0.6rem}
+.preview{width:50px;height:50px;object-fit:cover;border-radius:4px;border:1px solid #0f3460;cursor:pointer;transition:transform .2s}
+.preview:hover{transform:scale(1.1)}
+.preview.na{display:flex;align-items:center;justify-content:center;background:#1a1a2e;color:#555;font-size:0.6rem;cursor:default}
+.photo-strip{display:flex;gap:4px;align-items:center}
+.photo-strip .arrow{color:#555;font-size:0.7rem}
 input,select,textarea{background:#0f3460;border:1px solid #1a3a6a;color:#e0e0e0;padding:8px 10px;border-radius:4px;width:100%;font-size:0.8rem;margin-bottom:8px}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560}
 .btn{padding:8px 16px;border:none;border-radius:4px;cursor:pointer;font-weight:bold;font-size:0.8rem;transition:opacity .2s;margin:2px}
@@ -55,6 +58,15 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560}
 .footer{text-align:center;padding:20px;margin-top:20px;border-top:1px solid #0f3460;font-size:0.75rem;color:#555}
 .phase-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;padding:8px;background:#1a1a2e;border-radius:6px;margin-bottom:6px}
 .phase-row label{display:block;font-size:0.7rem;color:#888;margin-bottom:2px}
+/* Image viewer modal */
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:9999;cursor:zoom-out;justify-content:center;align-items:center}
+.modal.active{display:flex}
+.modal img{max-width:90vw;max-height:90vh;border-radius:8px;border:2px solid #0f3460;box-shadow:0 0 40px rgba(0,0,0,.5)}
+.modal .close{position:fixed;top:20px;right:30px;font-size:2rem;color:#e94560;cursor:pointer;z-index:10000;background:rgba(0,0,0,.5);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold}
+.modal .close:hover{background:#e94560;color:#fff}
+/* SKU link */
+.sku-link{color:#3498db;text-decoration:none}
+.sku-link:hover{text-decoration:underline;color:#e94560}
 @media(max-width:768px){.g2{grid-template-columns:1fr}}
 </style>
 </head>
@@ -74,6 +86,12 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560}
 </div>
 <div id="msg" class="msg"></div>
 
+<!-- Image viewer modal -->
+<div id="imgModal" class="modal" onclick="closeImgViewer()">
+  <span class="close" onclick="closeImgViewer()">✕</span>
+  <img id="imgModalContent" src="" alt="Preview">
+</div>
+
 <div class="section">
 <div class="tabs">
   <div class="tab active" onclick="sw('list')">📋 SKUs</div>
@@ -86,7 +104,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560}
 <div class="row" style="padding:0 0 10px 0"><input type="text" id="search" placeholder="🔍 Search..." onkeyup="render()" style="flex:1;margin:0"><button class="btn btn-blue btn-sm" onclick="fetchD()">🔄</button></div>
 <div class="scroll">
 <table>
-<thead><tr><th style="width:16%">SKU</th><th style="width:16%">Product</th><th style="width:8%">Phase</th><th style="width:10%">Current</th><th style="width:10%">Next</th><th style="width:8%">Next Time</th><th style="width:8%">Status</th><th style="width:8%"></th></tr></thead>
+<thead><tr><th style="width:15%">SKU / Link</th><th style="width:14%">Product</th><th style="width:6%">Phase</th><th style="width:9%">Current 🖼️</th><th style="width:9%">Next 🖼️</th><th style="width:9%">Next Time</th><th style="width:8%">Status</th><th style="width:6%"></th></tr></thead>
 <tbody id="tbList"></tbody></table></div></div>
 
 <!-- ADD -->
@@ -115,11 +133,11 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560}
 <thead><tr><th>Time</th><th>SKU</th><th>Phase</th><th>Photo</th><th>Result</th></tr></thead>
 <tbody id="tbLog"></tbody></table></div></div></div>
 
-<div class="footer"><span style="color:#e94560;font-weight:bold">🖼️ Bubble Photos v3.0</span><span style="color:#333;margin:0 8px">|</span><span style="color:#ffd700">Multi-phase</span></div></div>
+<div class="footer"><span style="color:#e94560;font-weight:bold">🖼️ Bubble Photos v3.1</span><span style="color:#333;margin:0 8px">|</span><span style="color:#ffd700">Click photo to enlarge · HKTVmall link</span></div></div>
 
 <script>
 var R='FIFICHECK/bubble-photos-dashboard',B='master',CU='https://raw.githubusercontent.com/'+R+'/'+B+'/config.json',DU='https://raw.githubusercontent.com/'+R+'/'+B+'/dashboard_data.json',TK=('ghp_'+'***REMOVED***')
-var C,D,rs=30,phaseCount=0
+var C,D,rs=30
 
 function init(){fetchD();setInterval(function(){rs--;if(rs<=0){rs=30;fetchD()};document.getElementById('sRefresh').textContent=rs+'s'},1000);setInterval(function(){var n=new Date();document.getElementById('sTimer').textContent=String(60-n.getSeconds()).padStart(2,'0')+'s'},1000)}
 init()
@@ -134,7 +152,17 @@ function upd(){
   if(!C)return;var sk=Object.keys(C.skus||{});var t=sk.length,a=0,d=0,p=0;
   sk.forEach(function(k){var s=C.skus[k];if(s.status==='active')a++;else if(s.status==='completed')d++;else p++});
   document.getElementById('sTotal').textContent=t;document.getElementById('sActive').textContent=a;document.getElementById('sDone').textContent=d;document.getElementById('sPending').textContent=p
-  var nx=nextUp(sk);document.getElementById('hdr').textContent=nx?'⏱️ Next: '+nx.sku+' phase '+nx.phase+' at '+nx.t:'⏱️ No upcoming';render()
+  var nx=nextUp(sk);document.getElementById('hdr').textContent=nx?'⏱️ Next: '+nx.sku+' phase '+(nx.phase+1)+' at '+nx.t:'⏱️ No upcoming';render()
+}
+
+function openImg(url){document.getElementById('imgModalContent').src=url;document.getElementById('imgModal').classList.add('active')}
+function closeImgViewer(){document.getElementById('imgModal').classList.remove('active')}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeImgViewer()})
+
+function imgHtml(url,size){
+  if(!url)return '<div class="preview na">--</div>'
+  var s=size||50
+  return '<img class="preview" src="'+esc(url)+'" style="width:'+s+'px;height:'+s+'px" onclick="openImg(\''+esc(url)+'\')" onerror="this.style.display=\'none\'" title="Click to enlarge">'
 }
 
 function nextUp(sk){
@@ -155,20 +183,34 @@ function render(){
   Object.keys(C.skus).forEach(function(k){
     var s=C.skus[k];if(q&&k.indexOf(q)===-1&&(s.product_name||'').indexOf(q)===-1)return
     var ph=s.phases||[],cur=s.current_phase!==undefined?s.current_phase:-1
-    var curLbl=cur>=0&&cur<ph.length?esc(ph[cur].label||'Phase '+(cur+1)):'--'
-    var nextLbl='--',nextTime='--'
-    for(var i=cur+1;i<ph.length;i++){if(ph[i].time){nextLbl=esc(ph[i].label||'Phase '+(i+1));try{nextTime=new Date(ph[i].time).toLocaleString('zh-HK',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false})}catch(e){}break}}
+    var curUrl=cur>=0&&cur<ph.length?ph[cur].photo_url||'':''
+    var nextUrl='',nextLbl='--',nextTime='--',nextIdx=-1
+    for(var i=cur+1;i<ph.length;i++){
+      if(ph[i].photo_url){nextUrl=ph[i].photo_url;nextLbl=esc(ph[i].label||'Phase '+(i+1));nextIdx=i;if(ph[i].time){try{nextTime=new Date(ph[i].time).toLocaleString('zh-HK',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false})}catch(e){}}break}
+    }
     var bc='badge '+s.status,bt=s.status==='active'?'🟢 Active':s.status==='completed'?'🔵 Done':s.status==='failed'?'❌ Fail':'⏳ Pending'
-    h+='<tr><td><code style="color:#3498db;font-size:0.7rem">'+esc(k)+'</code></td><td style="font-size:0.75rem">'+esc(s.product_name||'--')+'</td><td style="font-size:0.7rem">'+(cur+1)+'/'+ph.length+'</td><td style="font-size:0.7rem">'+curLbl+'</td><td style="font-size:0.7rem">'+nextLbl+'</td><td style="font-size:0.7rem;color:#888">'+nextTime+'</td><td><span class="'+bc+'">'+bt+'</span></td><td><button class="btn btn-sm btn-blue" onclick="editSku(\''+esc(k)+'\')">✎</button></td></tr>'
+    // Build HKTVmall link
+    var skuLink='https://www.hktvmall.com/hktv/p/'+k
+    h+='<tr>'
+    h+='<td><code style="font-size:0.7rem"><a class="sku-link" href="'+skuLink+'" target="_blank" title="Open in HKTVmall">'+esc(k)+' ↗</a></code></td>'
+    h+='<td style="font-size:0.75rem">'+esc(s.product_name||'--')+'</td>'
+    h+='<td style="font-size:0.7rem">'+(cur+1)+'/'+ph.length+'</td>'
+    h+='<td>'+imgHtml(curUrl)+(curUrl?'':'<div class="preview na">--</div>')+'</td>'
+    h+='<td>'+imgHtml(nextUrl,50)+(nextUrl?'':'<div class="preview na">--</div>')+'</td>'
+    h+='<td style="font-size:0.7rem;color:#888;white-space:nowrap">'+nextTime+'<br><span style="color:#888;font-size:0.6rem">'+nextLbl+'</span></td>'
+    h+='<td><span class="'+bc+'">'+bt+'</span></td>'
+    h+='<td><button class="btn btn-sm btn-blue" onclick="editSku(\''+esc(k)+'\')">✎</button></td>'
+    h+='</tr>'
   })
   tb.innerHTML=h||'<tr><td colspan="8" class="empty">No matches</td></tr>'
 }
 
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 
 // ========== FETCH NAME ==========
 function fetchName(){
   var sk=document.getElementById('fSku').value.trim();if(!sk){msg('Enter SKU',true);return}
+  msg('🔍 Fetching...')
   fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://www.hktvmall.com/hktv/p/'+sk)).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.text()}).then(function(h){var m=h.match(/<title>([^<]+)<\/title>/i);if(m){var n=m[1].replace(/\s*\|\s*HKTVmall.*$/,'').trim();document.getElementById('fName').value=n;msg('✅ '+n)}else msg('⚠️ Could not extract',true)}).catch(function(e){msg('⚠️ '+e.message,true)})
 }
 
@@ -181,15 +223,13 @@ function renderPhases(phases){
     var p=phases[i]
     h+='<div class="phase-row">'
     h+='<div><label>Phase '+(i+1)+' Label</label><input class="phLbl" data-i="'+i+'" value="'+esc(p.label||'')+'" placeholder="e.g. 🟢 波波圖"></div>'
-    h+='<div><label>Photo URL</label><input class="phUrl" data-i="'+i+'" value="'+esc(p.photo_url||'')+'" placeholder="https://..."></div>'
+    h+='<div><label>Photo URL '+imgHtml(p.photo_url||'',50)+'</label><input class="phUrl" data-i="'+i+'" value="'+esc(p.photo_url||'')+'" placeholder="https://..."></div>'
     h+='<div><label>Time</label><input class="phTime" data-i="'+i+'" type="datetime-local" value="'+(p.time?p.time.slice(0,16):'')+'"></div>'
-    h+='<div style="display:flex;gap:4px">'
-    h+='<img class="preview" src="'+esc(p.photo_url||'')+'" onerror="this.style.display=\'none\'" style="width:50px;height:50px">'
+    h+='<div style="display:flex;gap:4px;align-items:end;padding-bottom:8px">'
     h+='<button class="btn btn-sm" style="background:#e94560;color:#fff;padding:2px 8px" onclick="removePhase('+i+')">✕</button>'
     h+='</div></div>'
   }
   el.innerHTML=h
-  phaseCount=phases.length
 }
 
 function collectPhases(){
@@ -198,37 +238,18 @@ function collectPhases(){
   for(var i=0;i<lbls.length;i++){
     var lbl=lbls[i].value.trim(),url=urls[i].value.trim(),t=times[i].value
     if(lbl||url||t){
-      var phase={}
-      if(lbl)phase.label=lbl
-      if(url)phase.photo_url=url;else if(C&&document.getElementById('fSku').value.trim()&&C.skus[document.getElementById('fSku').value.trim()]&&C.skus[document.getElementById('fSku').value.trim()].phases&&C.skus[document.getElementById('fSku').value.trim()].phases[i])phase.photo_url=C.skus[document.getElementById('fSku').value.trim()].phases[i].photo_url||''
-      if(!phase.photo_url)phase.photo_url=''
-      if(t){phase.time=t+':00'}else{phase.time=''}
-      phases.push(phase)
+      var ph={};if(lbl)ph.label=lbl;if(url)ph.photo_url=url;else ph.photo_url=''
+      if(t){ph.time=t+':00'}else{ph.time=''}
+      phases.push(ph)
     }
   }
   return phases
 }
 
-function addPhase(){
-  var phases=collectPhases()
-  phases.push({time:'',photo_url:'',label:'Phase '+(phases.length+1)})
-  renderPhases(phases)
-}
+function addPhase(){var p=collectPhases();p.push({time:'',photo_url:'',label:'Phase '+(p.length+1)});renderPhases(p)}
+function removePhase(idx){var p=collectPhases();if(p.length<=1){msg('Need at least 1 phase',true);return}p.splice(idx,1);renderPhases(p)}
+function delPhase(){var idx=parseInt(document.getElementById('fDelIdx').value);if(isNaN(idx)){msg('Enter phase index',true);return}removePhase(idx)}
 
-function removePhase(idx){
-  var phases=collectPhases()
-  if(phases.length<=1){msg('Need at least 1 phase',true);return}
-  phases.splice(idx,1)
-  renderPhases(phases)
-}
-
-function delPhase(){
-  var idx=parseInt(document.getElementById('fDelIdx').value)
-  if(isNaN(idx)){msg('Enter phase index',true);return}
-  removePhase(idx)
-}
-
-// ========== SAVE SKU ==========
 function saveSku(){
   var sku=document.getElementById('fSku').value.trim(),name=document.getElementById('fName').value.trim()
   if(!sku){msg('SKU required',true);return}

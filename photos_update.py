@@ -207,6 +207,21 @@ def main():
         print('✅ No SKUs')
         return
 
+    # Auto-fetch missing product names
+    for sku, entry in skus.items():
+        if not entry.get('product_name'):
+            try:
+                sku_id = sku.split('_S_')[-1] if '_S_' in sku else sku
+                r = requests.get(f'https://www.hktvmall.com/hktv/p/{sku_id}', timeout=8, headers={'User-Agent': 'Mozilla/5.0'})
+                if r.ok:
+                    m = __import__('re').search(r'<title>([^<]+)</title>', r.text)
+                    if m:
+                        nm = m.group(1).split('|')[0].strip()
+                        config['skus'][sku]['product_name'] = nm
+                        print(f'  📝 {sku}: {nm}')
+            except Exception as e:
+                print(f'  ⚠️ {sku}: name fetch: {e}')
+
     actions = []
     for sku, entry in skus.items():
         status = entry.get('status', 'pending')

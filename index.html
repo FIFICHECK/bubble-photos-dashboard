@@ -207,11 +207,38 @@ function render(){
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 
-// ========== FETCH NAME ==========
+// ========== FETCH NAME (via backend) ==========
 function fetchName(){
   var sk=document.getElementById('fSku').value.trim();if(!sk){msg('Enter SKU',true);return}
-  msg('🔍 Fetching...')
-  fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://www.hktvmall.com/hktv/p/'+sk)).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.text()}).then(function(h){var m=h.match(/<title>([^<]+)<\/title>/i);if(m){var n=m[1].replace(/\s*\|\s*HKTVmall.*$/,'').trim();document.getElementById('fName').value=n;msg('✅ '+n)}else msg('⚠️ Could not extract',true)}).catch(function(e){msg('⚠️ '+e.message,true)})
+  msg('⏳ Trying to fetch product name...')
+  // Try multiple CORS proxies
+  var proxies = [
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?'
+  ];
+  var url = 'https://www.hktvmall.com/hktv/p/' + encodeURIComponent(sk);
+  function tryProxy(idx) {
+    if (idx >= proxies.length) {
+      msg('⚠️ Fetch failed. Enter name manually, or it will be auto-fetched by backend on next update.', true);
+      return;
+    }
+    fetch(proxies[idx] + url)
+      .then(function(r){ if (!r.ok) throw Error('HTTP '+r.status); return r.text(); })
+      .then(function(h){
+        var m = h.match(/<title>([^<]+)<\/title>/i);
+        if (m) {
+          var n = m[1].replace(/\s*\|\s*HKTVmall.*$/, '').trim();
+          document.getElementById('fName').value = n;
+          msg('✅ ' + n);
+        } else {
+          msg('⚠️ Could not extract. Enter manually.', true);
+        }
+      })
+      .catch(function(e){
+        tryProxy(idx + 1);
+      });
+  }
+  tryProxy(0);
 }
 
 // ========== PHASES UI ==========

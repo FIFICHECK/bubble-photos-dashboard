@@ -121,17 +121,31 @@ class MMSUpdater:
         print(f'  📸 [{label}] {sku}...')
         try:
             self.page.goto('https://merchant.shoalter.com/product-management/product-list', wait_until='networkidle')
-            time.sleep(2)
+            time.sleep(4)
+            debug_url = self.page.url
+            debug_title = self.page.title()
+            print(f'    PL URL: {debug_url}')
+            print(f'    PL Title: {debug_title}')
             inp = self.page.query_selector('input[placeholder="搜尋 SKU ID"]')
+            if not inp:
+                inp = self.page.query_selector('input[placeholder*="SKU"]')
+                if not inp:
+                    inp = self.page.query_selector('input.ant-input')
             if not inp: raise Exception('Search input not found')
             inp.fill(''); inp.fill(sku_id); time.sleep(0.5)
+            print(f'    Searching: {sku_id}')
             sb = self.page.query_selector('button:has-text("搜 索")')
             if sb: sb.click()
             else:
                 for b in self.page.query_selector_all('button'):
                     if '搜' in (b.inner_text() or ''): b.click(); break
-            time.sleep(3)
-            edit_url = self.page.evaluate("""(s)=>{var rows=document.querySelectorAll('tr.ant-table-row');for(var r of rows){var c=r.querySelectorAll('td');if(c.length>=4){var storeCell=c[2]?.innerText?.trim();if(storeCell===s){var links=c[c.length-1]?.querySelectorAll('a');if(links&&links.length>0)return links[links.length-1].href;}}}return null;}""", STORE_ID)
+            time.sleep(4)
+            # Debug: dump table content
+            table_data = self.page.evaluate("""()=>{var rows=document.querySelectorAll('tr.ant-table-row');var result=[];for(var r of rows){var c=r.querySelectorAll('td');var rowData=[];for(var i=0;i<c.length;i++){rowData.push(c[i]?.innerText?.trim()||'');result.push(rowData.join(' | '));}}return result.length?result.slice(0,10):['no rows'];}\"\"\")
+            if isinstance(table_data, list):
+                for td in table_data:
+                    print(f'      ROW: {td}')
+            edit_url = self.page.evaluate("""(s)=>{var rows=document.querySelectorAll('tr.ant-table-row');for(var r of rows){var c=r.querySelectorAll('td');if(c.length>=4){var firstCell=c[0]?.innerText?.trim();if(firstCell===s){var links=c[c.length-1]?.querySelectorAll('a');if(links&&links.length>0)return links[links.length-1].href;}}}return null;}""", STORE_ID)
             if not edit_url: raise Exception(f'No row for store {STORE_ID}')
             self.page.goto(edit_url, wait_until='networkidle'); time.sleep(3)
             # Delete existing photos
@@ -265,6 +279,12 @@ def main():
     dashboard['history'] = dashboard['history'][-500:]
 
     config.pop('_sha', None)
+    # Re-fetch SHA before saving (avoids 422 if config changed)
+    try:
+        info = gh_get('contents/config.json')
+        config['_sha'] = info['sha']
+    except:
+        pass
     save_json('config.json', config)
     save_json('dashboard_data.json', dashboard)
     print('✅ All saved!')

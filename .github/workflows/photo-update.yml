@@ -20,4 +20,4 @@ jobs:
       - name: Run photo update
         run: python photos_update.py
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUBBLE_PHOTOS_TOKEN: ${{ secrets.BUBBLE_PHOTOS_TOKEN }}

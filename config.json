@@ -25,7 +25,8 @@
         }
       ],
       "current_phase": -1,
-      "status": "failed"
+      "status": "failed",
+      "_next_phase": 0
     }
   }
 }

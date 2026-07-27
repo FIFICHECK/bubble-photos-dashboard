@@ -248,7 +248,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560;box-sh
   <th style="width:22%">Time</th>
   <th style="width:22%">SKU</th>
   <th style="width:18%">Phase</th>
-  <th style="width:23%">Photo</th>
+  <th style="width:23%;text-align:center">Photo 🖼️</th>
   <th style="width:9%;text-align:center">Result</th>
   <th style="width:6%;text-align:center">Del</th>
 </tr></thead>
@@ -459,7 +459,7 @@ function renderLog(){
     html+='<td style="font-size:0.75rem;color:#888">'+(x.time||'--')+'</td>'
     html+='<td><code style="color:#3498db;font-size:0.75rem"><a class="sku-link" href="https://www.hktvmall.com/hktv/p/'+esc(x.sku)+'" target="_blank">'+esc(x.sku)+'</a></code></td>'
     html+='<td style="font-size:0.8rem">'+esc(x.label||x.action||'--')+'</td>'
-    html+='<td style="font-size:0.75rem;color:#888;word-break:break-all">'+esc(x.photo||'--')+'</td>'
+    html+='<td style="text-align:center">'+imgHtml(x.photo||'')+'</td>'
     html+='<td style="text-align:center"><span class="'+bc+'">'+bt+'</span></td>'
     html+='<td style="text-align:center"><button class="btn btn-sm" style="background:#e94560;color:#fff;padding:2px 8px" onclick="deleteLog('+idx+')" title="刪除">✕</button></td>'
     html+='</tr>'

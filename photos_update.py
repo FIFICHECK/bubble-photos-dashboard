@@ -190,7 +190,7 @@ class MMSUpdater:
             self.login()
             for sku, url, lbl in actions:
                 ok = self.update_photo(sku, url, lbl)
-                results.append({'sku': sku, 'label': lbl, 'success': ok})
+                results.append({'sku': sku, 'label': lbl, 'photo': url, 'success': ok})
                 time.sleep(2)
         finally:
             self.stop()
@@ -288,7 +288,7 @@ def main():
     for r in results:
         dashboard['history'].append({
             'sku': r['sku'], 'label': r.get('label', ''),
-            'photo': '', 'status': 'success' if r['success'] else 'failed',
+            'photo': r.get('photo', ''), 'status': 'success' if r['success'] else 'failed',
             'time': now.isoformat()
         })
     dashboard['history'] = dashboard['history'][-500:]

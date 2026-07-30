@@ -103,7 +103,7 @@ class MMSUpdater:
         sku_id = sku.split('_S_')[-1] if '_S_' in sku else sku
         print(f'  📸 [{label}] {sku}...')
         try:
-            self.page.goto('https://merchant.shoalter.com/product-management/product-list', wait_until='networkidle')
+            self.page.goto('https://merchant.shoalter.com/product-management/product-list', wait_until='load', timeout=45000)
             time.sleep(3)
             # Search for SKU
             inp = self.page.query_selector('input[placeholder="搜尋 SKU ID"]')
@@ -134,7 +134,7 @@ class MMSUpdater:
             if not edit_url:
                 raise Exception(f'No edit link found for store {STORE_ID}')
             print(f'    Edit URL found')
-            self.page.goto(edit_url, wait_until='networkidle')
+            self.page.goto(edit_url, wait_until='domcontentloaded', timeout=45000)
             time.sleep(3)
             # Delete existing photos
             self.page.evaluate('() => {' +

@@ -2,31 +2,38 @@
   "history": [
     {
       "sku": "B0961005_S_4891609702053",
-      "label": "🟢 波波圖",
+      "label": "\ud83d\udfe2 \u6ce2\u6ce2\u5716",
       "photo": "https://lh3.googleusercontent.com/d/1nqRS8s4B8ZckaptLRPV4Y2rTiO4T1GzB",
       "status": "success",
       "time": "2026-07-26T18:52:33.264975"
     },
     {
       "sku": "B0961005_S_4891609702053",
-      "label": "🟠 85折後波波圖",
+      "label": "\ud83d\udfe0 85\u6298\u5f8c\u6ce2\u6ce2\u5716",
       "photo": "https://lh3.googleusercontent.com/d/1pq1npK-AoPSD13EL5Beq5khXTRmdUuQu",
       "status": "success",
       "time": "2026-07-26T18:54:17.968836"
     },
     {
       "sku": "B0961005_S_4891609702053",
-      "label": "🟢 波波圖",
+      "label": "\ud83d\udfe2 \u6ce2\u6ce2\u5716",
       "photo": "https://lh3.googleusercontent.com/d/1nqRS8s4B8ZckaptLRPV4Y2rTiO4T1GzB",
       "status": "success",
       "time": "2026-07-26T22:30:55.803304"
     },
     {
       "sku": "B0961005_S_4891609190294",
-      "label": "🟢 波波圖",
+      "label": "\ud83d\udfe2 \u6ce2\u6ce2\u5716",
       "photo": "https://lh3.googleusercontent.com/d/1PmeIL6OucFXMlrBdJ4pmSh1sZl1M0T4z",
       "status": "success",
       "time": "2026-07-30T16:53:20.774318"
+    },
+    {
+      "sku": "B0961005_S_4897036691441_24",
+      "label": "\ud83d\udfe2 \u6ce2\u6ce2\u5716",
+      "photo": "https://lh3.googleusercontent.com/d/19rpiGupxJLErFNw9muDEnz2cNLW6ihVp",
+      "status": "success",
+      "time": "2026-07-30T17:29:48.402565"
     }
   ]
 }

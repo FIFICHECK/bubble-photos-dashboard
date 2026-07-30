@@ -53,7 +53,8 @@
         }
       ],
       "current_phase": -1,
-      "status": "pending"
+      "status": "failed",
+      "_next_phase": 0
     }
   }
 }

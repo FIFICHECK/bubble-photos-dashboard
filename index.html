@@ -332,7 +332,7 @@ function render(){
     var s=C.skus[k];if(q&&k.indexOf(q)===-1&&(s.product_name||'').indexOf(q)===-1)return
     var ph=s.phases||[],cur=s.current_phase!==undefined?s.current_phase:-1
     var curUrl=cur>=0&&cur<ph.length?ph[cur].photo_url||'':''
-    var curLbl=cur>=0&&cur<ph.length?esc(ph[cur].label||''):''
+    var curLbl=cur>=0&&cur<ph.length?esc(ph[cur].label||''):(ph.length>0?esc(ph[0].label||''):'')
     var nextUrl='',nextLbl='--',nextTime='--',nextIdx=-1
     for(var i=cur+1;i<ph.length;i++){
       if(ph[i].photo_url){nextUrl=ph[i].photo_url;nextLbl=esc(ph[i].label||'Phase '+(i+1));nextIdx=i;if(ph[i].time){try{nextTime=new Date(ph[i].time).toLocaleString('zh-HK',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false})}catch(e){}}break}

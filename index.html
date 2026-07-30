@@ -211,7 +211,22 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560;box-sh
   <th style="width:9%;text-align:center">Status</th>
   <th style="width:10%;text-align:center">Action</th>
 </tr></thead>
-<tbody id="tbList"></tbody></table></div></div>
+<tbody id="tbList"></tbody></table>
+<!-- Completed SKUs section -->
+<div id="doneSection" style="display:none;margin-top:12px">
+  <h4 style="color:#3498db;font-size:0.8rem;padding:8px 0 4px">🔵 Completed <span id="doneCount" style="color:#888;font-weight:normal"></span></h4>
+  <table><thead><tr style="opacity:0.6">
+    <th style="width:30px;text-align:center"></th>
+    <th style="width:22%">SKU / Link</th>
+    <th style="width:20%">Product</th>
+    <th style="width:6%;text-align:center">Phase</th>
+    <th style="width:10%;text-align:center">Final 🖼️</th>
+    <th style="width:10%;text-align:center"></th>
+    <th style="width:13%">Completed</th>
+    <th style="width:9%;text-align:center">Status</th>
+    <th style="width:10%;text-align:center">Action</th>
+  </tr></thead>
+  <tbody id="tbDone"></tbody></table></div></div>
 
 <!-- ADD TAB -->
 <div id="tAdd" class="tc">
@@ -326,8 +341,9 @@ function nextUp(sk){
 }
 
 function render(){
-  var tb=document.getElementById('tbList');if(!C||!C.skus||Object.keys(C.skus).length===0){tb.innerHTML='<tr><td colspan="10" class="empty">No SKUs yet. Go to ➕ Add SKU tab to create one.</td></tr>';return}
-  var q=(document.getElementById('search').value||'').toLowerCase(),h=''
+  var tb=document.getElementById('tbList'),td=document.getElementById('tbDone'),ds=document.getElementById('doneSection'),dc=document.getElementById('doneCount')
+  if(!C||!C.skus||Object.keys(C.skus).length===0){tb.innerHTML='<tr><td colspan="10" class="empty">No SKUs yet. Go to ➕ Add SKU tab to create one.</td></tr>';td.innerHTML='';ds.style.display='none';return}
+  var q=(document.getElementById('search').value||'').toLowerCase(),h='',dh='',dhCount=0
   Object.keys(C.skus).forEach(function(k){
     var s=C.skus[k];if(q&&k.indexOf(q)===-1&&(s.product_name||'').indexOf(q)===-1)return
     var ph=s.phases||[],cur=s.current_phase!==undefined?s.current_phase:-1
@@ -339,19 +355,23 @@ function render(){
     }
     var bc='badge '+s.status,bt=s.status==='active'?'🟢 Active':s.status==='completed'?'🔵 Done':s.status==='failed'?'❌ Fail':'⏳ Pending'
     var skuLink='https://www.hktvmall.com/hktv/p/'+k
-    h+='<tr>'
-    h+='<td style="text-align:center"><input type="checkbox" class="skuSel" data-sku="'+esc(k)+'"></td>'
-    h+='<td><code style="font-size:0.75rem"><a class="sku-link" href="'+skuLink+'" target="_blank" title="Open in HKTVmall">'+esc(k)+'</a></code></td>'
-    h+='<td style="font-size:0.8rem;color:#e0e0e0">'+esc(s.product_name||'<span style="color:#555">--</span>')+'</td>'
-    h+='<td style="text-align:center;font-size:0.8rem;font-weight:600;color:#ffd700">'+(cur+1)+'/'+ph.length+'</td>'
-    h+='<td style="text-align:center"><div style="display:inline-block;text-align:center">'+imgHtml(curUrl)+'<br><span style="color:#aaa;font-size:0.65rem">'+curLbl+'</span></div></td>'
-    h+='<td style="text-align:center"><div style="display:inline-block;text-align:center">'+imgHtml(nextUrl)+'<br><span style="color:#aaa;font-size:0.65rem">'+nextLbl+'</span></div></td>'
-    h+='<td style="font-size:0.8rem;color:#e0e0e0;white-space:nowrap">'+nextTime+'<br><span style="color:#aaa;font-size:0.7rem">'+nextLbl+'</span></td>'
-    h+='<td style="text-align:center"><span class="'+bc+'">'+bt+'</span></td>'
-    h+='<td style="text-align:center"><div class="row" style="gap:4px;justify-content:center"><button class="btn btn-sm btn-blue" style="padding:4px 8px" onclick="editSku(\''+esc(k)+'\')" title="編輯">✎</button><button class="btn btn-sm" style="background:#e94560;color:#fff;padding:4px 8px" onclick="deleteSku(\''+esc(k)+'\')" title="刪除">✕</button></div></td>'
-    h+='</tr>'
+    var row='<tr>'
+    row+='<td style="text-align:center"><input type="checkbox" class="skuSel" data-sku="'+esc(k)+'"></td>'
+    row+='<td><code style="font-size:0.75rem"><a class="sku-link" href="'+skuLink+'" target="_blank" title="Open in HKTVmall">'+esc(k)+'</a></code></td>'
+    row+='<td style="font-size:0.8rem;color:#e0e0e0">'+esc(s.product_name||'<span style="color:#555">--</span>')+'</td>'
+    row+='<td style="text-align:center;font-size:0.8rem;font-weight:600;color:#ffd700">'+(cur+1)+'/'+ph.length+'</td>'
+    row+='<td style="text-align:center"><div style="display:inline-block;text-align:center">'+imgHtml(curUrl)+'<br><span style="color:#aaa;font-size:0.65rem">'+curLbl+'</span></div></td>'
+    row+='<td style="text-align:center"><div style="display:inline-block;text-align:center">'+imgHtml(nextUrl)+'<br><span style="color:#aaa;font-size:0.65rem">'+nextLbl+'</span></div></td>'
+    row+='<td style="font-size:0.8rem;color:#e0e0e0;white-space:nowrap">'+nextTime+'<br><span style="color:#aaa;font-size:0.7rem">'+nextLbl+'</span></td>'
+    row+='<td style="text-align:center"><span class="'+bc+'">'+bt+'</span></td>'
+    row+='<td style="text-align:center"><div class="row" style="gap:4px;justify-content:center"><button class="btn btn-sm btn-blue" style="padding:4px 8px" onclick="editSku(\''+esc(k)+'\')" title="編輯">✎</button><button class="btn btn-sm" style="background:#e94560;color:#fff;padding:4px 8px" onclick="deleteSku(\''+esc(k)+'\')" title="刪除">✕</button></div></td>'
+    row+='</tr>'
+    if(s.status==='completed'){dh+=row;dhCount++}
+    else h+=row
   })
-  tb.innerHTML=h||'<tr><td colspan="10" class="empty">No matches</td></tr>'
+  tb.innerHTML=h||'<tr><td colspan="10" class="empty">No active/pending SKUs</td></tr>'
+  if(dhCount>0){td.innerHTML=dh;ds.style.display='block';dc.textContent='('+dhCount+')'}
+  else{td.innerHTML='';ds.style.display='none'}
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}

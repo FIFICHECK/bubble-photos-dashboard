@@ -462,46 +462,32 @@ function fetchDrivePhotos(){
   var sku=document.getElementById('fSku').value.trim()
   if(!sku){msg('先輸入 🔑 SKU ID 再按自動填相',true);return}
   var skuBase=sku.split('_S_').pop()||sku
-  msg('⏳ 讀取 Google Drive folder...')
-  var url='https://drive.google.com/embeddedfolderview?id='+DRIVE_FOLDER+'#list'
-  var proxies=['https://api.allorigins.win/raw?url=','https://corsproxy.io/?']
-  function tryP(idx){
-    if(idx>=proxies.length){msg('⚠️ 讀取失敗 — 確認 folder 係 public',true);return}
-    fetch(proxies[idx]+encodeURIComponent(url)).then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.text()}).then(function(html){
-      // Parse entries: title + drive link pairs
-      var entries=[]
-      var re=/flip-entry-title[^>]*>([\s\S]*?)<\/div>[\s\S]*?flip-entry-link[^>]*>[\s\S]*?href="(https:\/\/drive\.google\.com\/file\/d\/[^"/]+)/g,m
-      while((m=re.exec(html))){entries.push({name:m[1].replace(/<[^>]+>/g,'').trim(),link:m[2]})}
-      if(entries.length===0){
-        // fallback: data-id attribute
-        var re2=/data-id="([^"]+)"/g
-        while((m=re2.exec(html))){entries.push({name:sku,link:'https://drive.google.com/file/d/'+m[1]+'/view'})}
-      }
-      if(entries.length===0){msg('⚠️ Folder 無檔案或格式改變',true);return}
-      var wave='',p85='',orig=''
-      entries.forEach(function(e){
-        var fid=e.link.split('/file/d/')[1]||''
-        fid=fid.split('/')[0]
-        var kind=matchDriveName(e.name,sku,skuBase)
-        if(kind==='wave'&&!wave)wave=driveCdn(fid)
-        else if(kind==='85'&&!p85)p85=driveCdn(fid)
-        else if(kind==='orig'&&!orig)orig=driveCdn(fid)
-      })
-      var phases=collectPhases()
-      var filled=0
-      phases.forEach(function(p,i){
-        var url2=i%2===0?wave:(i===1?p85:orig)
-        if(i===1)url2=p85
-        else if(i===3)url2=orig
-        else url2=wave
-        if(url2&&!p.photo_url){p.photo_url=url2;filled++}
-      })
-      renderPhases(phases)
-      if(filled>0)msg('✅ 已自動填入 '+filled+' 張相！')
-      else msg('⚠️ 搵唔到對應檔案名（要用 SKU ID 命名）',true)
-    }).catch(function(e){tryP(idx+1)})
-  }
-  tryP(0)
+  msg('⏳ 讀取 Google Drive photos...')
+  fetch('https://raw.githubusercontent.com/'+R+'/'+B+'/drive_photos.json?v='+Date.now()).then(function(r){
+    if(!r.ok)throw Error('HTTP '+r.status)
+    return r.json()
+  }).then(function(j){
+    var entries=j&&j.files?j.files:[]
+    if(entries.length===0){msg('⚠️ Folder 無檔案或格式改變',true);return}
+    var wave='',p85='',orig=''
+    entries.forEach(function(e){
+      var kind=matchDriveName(e.name,sku,skuBase)
+      if(kind==='wave'&&!wave)wave=driveCdn(e.file_id)
+      else if(kind==='85'&&!p85)p85=driveCdn(e.file_id)
+      else if(kind==='orig'&&!orig)orig=driveCdn(e.file_id)
+    })
+    var phases=collectPhases()
+    var filled=0
+    phases.forEach(function(p,i){
+      var url2=(i===1?p85:(i===3?orig:wave))
+      if(url2&&!p.photo_url){p.photo_url=url2;filled++}
+    })
+    renderPhases(phases)
+    if(filled>0)msg('✅ 已自動填入 '+filled+' 張相！')
+    else msg('⚠️ 搵唔到對應檔案名（要用 SKU ID 命名）',true)
+  }).catch(function(e){
+    msg('⚠️ 讀取失敗 — 稍後再試',true)
+  })
 }
 function removePhase(idx){var p=collectPhases();if(p.length<=1){msg('Need at least 1 phase',true);return}p.splice(idx,1);renderPhases(p)}
 function delPhase(){var idx=parseInt(document.getElementById('fDelIdx').value);if(isNaN(idx)){msg('Enter phase index',true);return}removePhase(idx)}

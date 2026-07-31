@@ -48,7 +48,7 @@ for sku, entry in config.get('skus', {}).items():
         try:
             pt = datetime.fromisoformat(t)
             diff = (pt - now).total_seconds()
-            if diff <= 900 and diff > -120:  # within 15min before or 2min after
+            if diff <= 900 and diff >= -900:  # within 15min before OR 15min after (photos_update runs when time has passed)
                 should_run = True
                 reasons.append(f'{sku} Phase {i+1} ({p.get("label","")}) at {t}')
             break  # only check next pending phase

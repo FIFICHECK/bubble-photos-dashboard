@@ -110,6 +110,33 @@
       ],
       "current_phase": -1,
       "status": "pending"
+    },
+    "B0961005_S_9311770608084": {
+      "product_name": "Swisse | 鉑金膠原蛋白美肌飲 8 x 50ml【香港行貨】【最佳使用日期: 04/2027】",
+      "phases": [
+        {
+          "label": "🟢 波波圖",
+          "photo_url": "https://lh3.googleusercontent.com/d/1n-esSTaUYqkZ39UkiiPmDjYjL2mRPA3w",
+          "time": "2026-08-06T19:40:00"
+        },
+        {
+          "label": "🟠 85折後波波圖",
+          "photo_url": "https://lh3.googleusercontent.com/d/14di38cOhb3if85UuWpcXWyabfnbq96U-",
+          "time": "2026-08-07T23:58:00"
+        },
+        {
+          "label": "🟢 波波圖",
+          "photo_url": "https://lh3.googleusercontent.com/d/1n-esSTaUYqkZ39UkiiPmDjYjL2mRPA3w",
+          "time": "2026-08-09T22:28:00"
+        },
+        {
+          "label": "🔵 原圖",
+          "photo_url": "https://lh3.googleusercontent.com/d/1DMDpA7p9JZAqCF84z9ZjgQFdR-EGvLc5",
+          "time": "2026-08-13T23:58:00"
+        }
+      ],
+      "current_phase": -1,
+      "status": "pending"
     }
   }
 }

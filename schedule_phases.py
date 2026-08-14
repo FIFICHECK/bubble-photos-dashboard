@@ -48,7 +48,7 @@ for sku, entry in config.get('skus', {}).items():
         try:
             pt = datetime.fromisoformat(t)
             diff = (pt - now).total_seconds()
-            if diff <= 0 and diff >= -900:  # phase time passed within last 15 min
+            if diff <= 900:  # due within next 15 min OR already overdue (any age) → catch-up
                 should_run = True
                 reasons.append(f'{sku} Phase {i+1} ({p.get("label","")}) at {t}')
             break  # only check next pending phase

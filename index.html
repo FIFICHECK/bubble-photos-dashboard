@@ -416,7 +416,7 @@ function collectPhases(){
   var phases=[]
   var lbls=document.querySelectorAll('.phLbl'),urls=document.querySelectorAll('.phUrl'),times=document.querySelectorAll('.phTime')
   for(var i=0;i<lbls.length;i++){
-    var lbl=lbls[i].value.trim(),url=urls[i].value.trim(),t=times[i].value
+    var lbl=lbls[i].value.trim(),url=normUrl(urls[i].value),t=times[i].value
     if(lbl||url||t){
       var ph={};if(lbl)ph.label=lbl;if(url)ph.photo_url=url;else ph.photo_url=''
       if(t){ph.time=t+':00'}else{ph.time=''}
@@ -449,6 +449,14 @@ function addPhase(){
 // ========== GOOGLE DRIVE AUTO-FILL ==========
 var DRIVE_FOLDER='1xyzWMrEK7EMsVKBBH2_8dRMYVCXK0E5q'
 function driveCdn(fileId){return 'https://lh3.googleusercontent.com/d/'+fileId}
+// Auto-convert Google Drive share links to lh3 CDN form (Drive links render as HTML, not images)
+function normUrl(u){
+  if(!u)return ''
+  u=u.trim()
+  var m=u.match(/drive\.google\.com\/file\/d\/([^\/?#]+)/)
+  if(m)return driveCdn(m[1])
+  return u
+}
 
 function matchDriveName(name,sku,skuBase){
   var n=String(name||'').replace(/\.(jpe?g|png|gif|webp|heic|avif)$/i,'').replace(/^\[/,'').trim()

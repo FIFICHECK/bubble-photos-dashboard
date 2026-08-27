@@ -10,7 +10,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 GITHUB_REPO = 'FIFICHECK/bubble-photos-dashboard'
 GITHUB_BRANCH = 'master'
 MMS_EMAIL = '***REDACTED***'
-MMS_PASSWORD = '***REDACTED***!!!'
+MMS_PASSWORD = '***REDACTED***'
 STORE_ID = 'B0961005'
 
 def get_token():

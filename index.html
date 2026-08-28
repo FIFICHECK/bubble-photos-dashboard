@@ -509,6 +509,9 @@ function saveSku(){
   var e=c.skus[sku]||{product_name:'',phases:[],current_phase:-1,status:'pending'}
   if(name)e.product_name=name
   e.phases=phases
+  // FIX 2026-08-28: re-scheduled (future) phases on a completed/stale SKU must reset progress, else scheduler skips it
+  var bpHasFuture=phases.some(function(p){return p&&p.time&&new Date(p.time).getTime()>Date.now()})
+  if(bpHasFuture&&(e.status==='completed'||e.current_phase>=phases.length)){e.current_phase=-1;e.status='pending'}
   if(!e.current_phase&&e.current_phase!==0)e.current_phase=-1
   if(!e.status)e.status='pending'
   c.skus[sku]=e

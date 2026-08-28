@@ -9,9 +9,28 @@ from playwright.sync_api import sync_playwright
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 GITHUB_REPO = 'FIFICHECK/bubble-photos-dashboard'
 GITHUB_BRANCH = 'master'
-MMS_EMAIL = '***REDACTED***'
-MMS_PASSWORD = '***REDACTED***'
-STORE_ID = 'B0961005'
+
+def _load_mms_creds():
+    """Load MMS credentials from local gitignored mms_creds.json (or env vars).
+    NEVER hardcode credentials in this file — it lives in a public repo."""
+    creds = {}
+    path = os.path.join(BASE_DIR, 'mms_creds.json')
+    if os.path.exists(path):
+        try:
+            with open(path, encoding='utf-8') as f:
+                creds = json.load(f)
+        except Exception:
+            creds = {}
+    return {
+        'email': creds.get('mms_email') or os.environ.get('MMS_EMAIL', ''),
+        'password': creds.get('mms_password') or os.environ.get('MMS_PASSWORD', ''),
+        'store_id': creds.get('store_id') or os.environ.get('MMS_STORE_ID', 'B0961005'),
+    }
+
+_creds = _load_mms_creds()
+MMS_EMAIL = _creds['email']
+MMS_PASSWORD = _creds['password']
+STORE_ID = _creds['store_id']
 
 def get_token():
     return os.environ.get('BUBBLE_PHOTOS_TOKEN', '')

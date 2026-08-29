@@ -601,9 +601,10 @@ function sw(n){document.querySelectorAll('.tab').forEach(function(t){t.classList
 
 // ===== Login gate (2026-08-28) — proxy requires Cloudflare Access login =====
 function checkLogin(){
-  fetch(PX+'/api/health',{credentials:'include'}).then(function(r){
-    return r.json().then(function(j){ if(!j||!j.ok) showLoginBanner(); }).catch(function(){ showLoginBanner(); });
-  }).catch(function(){});
+  fetch(PX+'/api/health',{credentials:'include',redirect:'manual'}).then(function(r){
+    if(r.type==='opaqueredirect'||r.status===0||r.status===302){ showLoginBanner(); return; }
+    r.json().then(function(j){ if(!j||!j.ok) showLoginBanner(); }).catch(function(){ showLoginBanner(); });
+  }).catch(function(){ showLoginBanner(); });
 }
 function showLoginBanner(){
   if(document.getElementById('loginBanner'))return;

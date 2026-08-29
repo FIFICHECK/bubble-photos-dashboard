@@ -286,7 +286,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560;box-sh
 var R='FIFICHECK/bubble-photos-dashboard',B='master',CU='https://raw.githubusercontent.com/'+R+'/'+B+'/config.json',DU='https://raw.githubusercontent.com/'+R+'/'+B+'/dashboard_data.json',PX='https://fificheck-write-proxy.fificheck.workers.dev'
 var C,D,rs=30
 
-function init(){fetchD();setInterval(function(){rs--;if(rs<=0){rs=30;fetchD()};document.getElementById('sRefresh').textContent=rs+'s'},1000);setInterval(function(){var n=new Date();document.getElementById('sTimer').textContent=String(60-n.getSeconds()).padStart(2,'0')+'s'},1000)}
+function init(){fetchD();setInterval(function(){rs--;if(rs<=0){rs=30;fetchD();checkLogin()};document.getElementById('sRefresh').textContent=rs+'s'},1000);setInterval(function(){var n=new Date();document.getElementById('sTimer').textContent=String(60-n.getSeconds()).padStart(2,'0')+'s'},1000)}
 init()
 
 function fetchD(){Promise.all([fetch(CU).then(function(r){if(!r.ok)throw Error('C fail');return r.json()}),fetch(DU).then(function(r){if(!r.ok)throw Error('D fail');return r.json()}).catch(function(){return{}})]).then(function(r){C=r[0];D=r[1]||{};upd();rs=30}).catch(function(e){console.log('E:',e.message)})}
@@ -603,9 +603,11 @@ function sw(n){document.querySelectorAll('.tab').forEach(function(t){t.classList
 function checkLogin(){
   fetch(PX+'/api/health',{credentials:'include',redirect:'manual'}).then(function(r){
     if(r.type==='opaqueredirect'||r.status===0||r.status===302){ showLoginBanner(); return; }
-    r.json().then(function(j){ if(!j||!j.ok) showLoginBanner(); }).catch(function(){ showLoginBanner(); });
+    r.json().then(function(j){ if(j&&j.ok) hideLoginBanner(); else showLoginBanner(); }).catch(function(){ showLoginBanner(); });
   }).catch(function(){ showLoginBanner(); });
 }
+function hideLoginBanner(){ var b=document.getElementById('loginBanner'); if(b) b.remove(); }
+window.addEventListener('focus', checkLogin);
 function showLoginBanner(){
   if(document.getElementById('loginBanner'))return;
   var b=document.createElement('div');b.id='loginBanner';

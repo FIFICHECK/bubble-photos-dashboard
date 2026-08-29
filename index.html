@@ -456,7 +456,7 @@ function normUrl(u){
   if(!u)return ''
   u=u.trim()
   var m=u.match(/drive\.google\.com\/file\/d\/([^\/?#]+)/)
-  if(m)return driveCdn(m[1])
+  if(m)return 'https://lh3.googleusercontent.com/d/'+m[1]
   var p=u.match(/fificheck-img-proxy\.fificheck\.workers\.dev\/img\/([A-Za-z0-9_-]+)/)
   if(p)return 'https://lh3.googleusercontent.com/d/'+p[1]
   return u

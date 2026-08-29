@@ -405,7 +405,7 @@ function renderPhases(phases){
     var p=phases[i]
     h+='<div class="phase-row">'
     h+='<div><label>Phase '+(i+1)+'</label><input class="phLbl" data-i="'+i+'" value="'+esc(p.label||'')+'" placeholder="e.g. 🟢 波波圖"></div>'
-    h+='<div><label>Photo URL '+imgHtml(p.photo_url||'',56)+'</label><input class="phUrl" data-i="'+i+'" value="'+esc(p.photo_url||'')+'" placeholder="https://lh3.googleusercontent.com/d/..."></div>'
+    h+='<div><label>Photo URL '+imgHtml(p.photo_url||'',56)+'</label><input class="phUrl" data-i="'+i+'" value="'+esc(proxify(p.photo_url||''))+'" placeholder="Photo URL (Drive / proxy link)"></div>'
     h+='<div><label>Date / Time</label><input class="phTime" data-i="'+i+'" type="datetime-local" value="'+(p.time?p.time.slice(0,16):'')+'"></div>'
     h+='<div style="display:flex;gap:4px;align-items:end;padding-bottom:4px">'
     h+='<button class="btn btn-sm" style="background:#e94560;color:#fff;padding:4px 10px" onclick="removePhase('+i+')">✕</button>'
@@ -457,6 +457,13 @@ function normUrl(u){
   u=u.trim()
   var m=u.match(/drive\.google\.com\/file\/d\/([^\/?#]+)/)
   if(m)return driveCdn(m[1])
+  var p=u.match(/fificheck-img-proxy\.fificheck\.workers\.dev\/img\/([A-Za-z0-9_-]+)/)
+  if(p)return 'https://lh3.googleusercontent.com/d/'+p[1]
+  return u
+}
+function proxify(u){
+  if(!u)return ''
+  if(u.indexOf('lh3.googleusercontent.com/d/')>-1)return u.replace('https://lh3.googleusercontent.com/d/','https://fificheck-img-proxy.fificheck.workers.dev/img/')
   return u
 }
 

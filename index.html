@@ -90,6 +90,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560;box-sh
 .toolbar-row .search-wrap input{padding-left:30px;margin:0}
 .toolbar-row .search-wrap .search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#555;font-size:0.8rem}
 @media(max-width:768px){.g2{grid-template-columns:1fr}.header h1{font-size:1.1rem}.stats{grid-template-columns:repeat(3,1fr)}}
+img.preview,#imgModalContent{-webkit-user-drag:none;user-select:none;-webkit-touch-callout:none;pointer-events:auto}
 </style>
 </head>
 <body>
@@ -325,6 +326,7 @@ function closeHelp(){document.getElementById('helpModal').classList.remove('acti
 
 function imgHtml(url,size){
   if(!url)return '<div class="preview na">--</div>'
+  if(url.indexOf('lh3.googleusercontent.com')>-1){url=url.replace('https://lh3.googleusercontent.com/d/','https://fificheck-img-proxy.fificheck.workers.dev/img/')}
   var s=size||56
   return '<img class="preview" src="'+esc(url)+'" style="width:'+s+'px;height:'+s+'px" onclick="openImg(\''+esc(url)+'\')" onerror="this.style.display=\'none\'" title="Click to enlarge">'
 }
@@ -448,7 +450,7 @@ function addPhase(){
 
 // ========== GOOGLE DRIVE AUTO-FILL ==========
 var DRIVE_FOLDER='1xyzWMrEK7EMsVKBBH2_8dRMYVCXK0E5q'
-function driveCdn(fileId){return 'https://lh3.googleusercontent.com/d/'+fileId}
+function driveCdn(fileId){return 'https://fificheck-img-proxy.fificheck.workers.dev/img/'+fileId}
 // Auto-convert Google Drive share links to lh3 CDN form (Drive links render as HTML, not images)
 function normUrl(u){
   if(!u)return ''
@@ -600,6 +602,7 @@ function saveData(d,cb){
 function sw(n){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});document.querySelectorAll('.tc').forEach(function(t){t.classList.remove('active')});var m={list:'List',add:'Add',log:'Log'};document.querySelector('.tab[onclick*="'+n+'"]').classList.add('active');document.getElementById('t'+m[n]).classList.add('active');if(n==='log')renderLog()}
 
 // ===== Login gate (2026-08-28) — proxy requires Cloudflare Access login =====
+document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.tagName==='IMG')e.preventDefault()});
 function checkLogin(){
   fetch(PX+'/api/health',{credentials:'include',redirect:'manual'}).then(function(r){
     if(r.type==='opaqueredirect'||r.status===0||r.status===302){ showLoginBanner(); return; }

@@ -297,7 +297,7 @@ function save(c,cb){
   function doSave(attempt){
     fetch(PX+'/api/repos/'+R+'/contents/config.json',{credentials:'include',headers:{'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.json()}).then(function(i){
       var s=i.sha||''
-      fetch(PX+'/api/repos/'+R+'/contents/config.json',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update config',content:btoa(unescape(encodeURIComponent(JSON.stringify(c,null,2)))),sha:s,branch:B})}).then(function(r){
+      fetch(PX+'/api/repos/'+R+'/contents/config.json',{method:'POST',credentials:'include',headers:{'Content-Type':'text/plain','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update config',content:btoa(unescape(encodeURIComponent(JSON.stringify(c,null,2)))),sha:s,branch:B})}).then(function(r){
         if(r.ok)return r.json();
         return r.json().then(function(e){throw new Error((e.message||'unknown')+' (attempt '+(attempt+1)+')')});
       }).then(function(r){msg('✅ Saved!');if(cb)cb();fetchD()}).catch(function(e){
@@ -586,7 +586,7 @@ function saveData(d,cb){
   function doSave(attempt){
     fetch(PX+'/api/repos/'+R+'/contents/dashboard_data.json',{credentials:'include',headers:{'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.json()}).then(function(i){
       var s=i.sha||''
-      fetch(PX+'/api/repos/'+R+'/contents/dashboard_data.json',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update dashboard data',content:btoa(unescape(encodeURIComponent(JSON.stringify(d,null,2)))),sha:s,branch:B})}).then(function(r){
+      fetch(PX+'/api/repos/'+R+'/contents/dashboard_data.json',{method:'POST',credentials:'include',headers:{'Content-Type':'text/plain','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update dashboard data',content:btoa(unescape(encodeURIComponent(JSON.stringify(d,null,2)))),sha:s,branch:B})}).then(function(r){
         if(r.ok)return r.json();return r.json().then(function(e){throw new Error((e.message||'unknown')+' (attempt '+(attempt+1)+')')});
       }).then(function(r){msg('✅ Done!');if(cb)cb();fetchD()}).catch(function(e){
         if(attempt<5){setTimeout(function(){doSave(attempt+1)},1500)}else msg('❌ Delete failed after 5 attempts',true)

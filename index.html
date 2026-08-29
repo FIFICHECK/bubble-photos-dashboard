@@ -283,7 +283,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560;box-sh
 </div>
 
 <script>
-var R='FIFICHECK/bubble-photos-dashboard',B='master',CU='https://raw.githubusercontent.com/'+R+'/'+B+'/config.json',DU='https://raw.githubusercontent.com/'+R+'/'+B+'/dashboard_data.json',TK=('ghp_'+'***REMOVED***')
+var R='FIFICHECK/bubble-photos-dashboard',B='master',CU='https://raw.githubusercontent.com/'+R+'/'+B+'/config.json',DU='https://raw.githubusercontent.com/'+R+'/'+B+'/dashboard_data.json',PX='https://fificheck-write-proxy.fificheck.workers.dev'
 var C,D,rs=30
 
 function init(){fetchD();setInterval(function(){rs--;if(rs<=0){rs=30;fetchD()};document.getElementById('sRefresh').textContent=rs+'s'},1000);setInterval(function(){var n=new Date();document.getElementById('sTimer').textContent=String(60-n.getSeconds()).padStart(2,'0')+'s'},1000)}
@@ -295,9 +295,9 @@ function msg(t,e){var el=document.getElementById('msg');el.textContent=t;el.clas
 
 function save(c,cb){
   function doSave(attempt){
-    fetch('https://api.github.com/repos/'+R+'/contents/config.json?ref='+B,{headers:{'Authorization':'token '+TK,'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.json()}).then(function(i){
+    fetch(PX+'/api/repos/'+R+'/contents/config.json',{credentials:'include',headers:{'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.json()}).then(function(i){
       var s=i.sha||''
-      fetch('https://api.github.com/repos/'+R+'/contents/config.json',{method:'PUT',headers:{'Authorization':'token '+TK,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update config',content:btoa(unescape(encodeURIComponent(JSON.stringify(c,null,2)))),sha:s,branch:B})}).then(function(r){
+      fetch(PX+'/api/repos/'+R+'/contents/config.json',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update config',content:btoa(unescape(encodeURIComponent(JSON.stringify(c,null,2)))),sha:s,branch:B})}).then(function(r){
         if(r.ok)return r.json();
         return r.json().then(function(e){throw new Error((e.message||'unknown')+' (attempt '+(attempt+1)+')')});
       }).then(function(r){msg('✅ Saved!');if(cb)cb();fetchD()}).catch(function(e){
@@ -584,9 +584,9 @@ function batchDeleteLog(){
 }
 function saveData(d,cb){
   function doSave(attempt){
-    fetch('https://api.github.com/repos/'+R+'/contents/dashboard_data.json?ref='+B,{headers:{'Authorization':'token '+TK,'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.json()}).then(function(i){
+    fetch(PX+'/api/repos/'+R+'/contents/dashboard_data.json',{credentials:'include',headers:{'Accept':'application/vnd.github.v3+json'}}).then(function(r){return r.json()}).then(function(i){
       var s=i.sha||''
-      fetch('https://api.github.com/repos/'+R+'/contents/dashboard_data.json',{method:'PUT',headers:{'Authorization':'token '+TK,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update dashboard data',content:btoa(unescape(encodeURIComponent(JSON.stringify(d,null,2)))),sha:s,branch:B})}).then(function(r){
+      fetch(PX+'/api/repos/'+R+'/contents/dashboard_data.json',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update dashboard data',content:btoa(unescape(encodeURIComponent(JSON.stringify(d,null,2)))),sha:s,branch:B})}).then(function(r){
         if(r.ok)return r.json();return r.json().then(function(e){throw new Error((e.message||'unknown')+' (attempt '+(attempt+1)+')')});
       }).then(function(r){msg('✅ Done!');if(cb)cb();fetchD()}).catch(function(e){
         if(attempt<5){setTimeout(function(){doSave(attempt+1)},1500)}else msg('❌ Delete failed after 5 attempts',true)
@@ -598,6 +598,21 @@ function saveData(d,cb){
 
 // ========== TABS ==========
 function sw(n){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});document.querySelectorAll('.tc').forEach(function(t){t.classList.remove('active')});var m={list:'List',add:'Add',log:'Log'};document.querySelector('.tab[onclick*="'+n+'"]').classList.add('active');document.getElementById('t'+m[n]).classList.add('active');if(n==='log')renderLog()}
+
+// ===== Login gate (2026-08-28) — proxy requires Cloudflare Access login =====
+function checkLogin(){
+  fetch(PX+'/api/health',{credentials:'include'}).then(function(r){
+    return r.json().then(function(j){ if(!j||!j.ok) showLoginBanner(); }).catch(function(){ showLoginBanner(); });
+  }).catch(function(){});
+}
+function showLoginBanner(){
+  if(document.getElementById('loginBanner'))return;
+  var b=document.createElement('div');b.id='loginBanner';
+  b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:#e94560;color:#fff;padding:10px 12px;text-align:center;font-size:0.85rem;font-weight:bold';
+  b.innerHTML='🔐 未登入 — 儲存功能暫停。 <a href="'+PX+'" target="_blank" style="color:#fff;text-decoration:underline">按此登入（email + 一次性驗證碼）</a>';
+  document.body.prepend(b);
+}
+checkLogin();
 </script>
 </body>
 </html>

@@ -164,9 +164,9 @@
           "time": "2026-09-03T22:28:00"
         }
       ],
-      "current_phase": 2,
-      "status": "active",
-      "last_updated": "2026-08-30T22:30:20.716823"
+      "current_phase": 3,
+      "status": "completed",
+      "last_updated": "2026-09-03T22:30:38.053504"
     }
   }
 }

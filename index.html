@@ -524,7 +524,7 @@ function saveSku(){
   if(!e.current_phase&&e.current_phase!==0)e.current_phase=-1
   if(!e.status)e.status='pending'
   c.skus[sku]=e
-  save(c,function(){document.getElementById('fSku').value='';document.getElementById('fName').value='';renderPhases([]);sw('list')})
+  save(c,function(){document.getElementById('fSku').value='';document.getElementById('fName').value='';renderPhases([]);sw('list');fetchD()})
 }
 
 function editSku(sku){
